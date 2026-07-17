@@ -215,6 +215,7 @@ html, body {
 /* Cover page special style */
 .page.cover {
   background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
 }
 
 .page.cover .page-content {
@@ -222,6 +223,9 @@ html, body {
   justify-content: center;
   align-items: center;
   text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
 }
 
 .page.cover .cover-title {
@@ -246,6 +250,19 @@ html, body {
   color: #6b5d4f;
   margin-top: 40px;
   letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Navigation */
@@ -368,12 +385,14 @@ html, body {
 
   <!-- Page 0: Cover -->
   <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="环境的秘密">
+    </div>
     <div class="page-content">
       <div class="cover-title">环境的秘密</div>
       <div class="cover-subtitle">你以为是你在选择，其实是环境在塑造你</div>
       <div class="cover-meta">讲给点点的 10 个故事</div>
     </div>
-    <div class="page-media full" style="position:absolute;inset:0;opacity:0.3;"><img src="images/01_cover.png" alt="cover" style="object-fit:cover;"></div>
   </div>
 
   <!-- Page 1: Broken Windows 1982 -->
@@ -394,7 +413,17 @@ html, body {
       </div>
       <div class="page-num">壹</div>
     </div>
-    <div class="page-media"><img src="images/02_subway.png" alt="02 subway"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/02_subway.png', 'image')">
+        <img src="images/02_subway.png" alt="破窗效应">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/broken_window.glb', 'model')">
+        <model-viewer src="../../assets/models/broken_window.glb" alt="破窗3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 2: Rosenthal 1968 -->
@@ -416,7 +445,17 @@ html, body {
       </div>
       <div class="page-num">贰</div>
     </div>
-    <div class="page-media"><img src="images/03_rosenthal.png" alt="03 rosenthal"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/03_rosenthal.png', 'image')">
+        <img src="images/03_rosenthal.png" alt="罗森塔尔效应">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/eye.glb', 'model')">
+        <model-viewer src="../../assets/models/eye.glb" alt="眼睛3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 3: 4-Minute Mile 1954 -->
@@ -437,7 +476,17 @@ html, body {
       </div>
       <div class="page-num">叁</div>
     </div>
-    <div class="page-media"><img src="images/04_mile.png" alt="04 mile"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/04_mile.png', 'image')">
+        <img src="images/04_mile.png" alt="4分钟魔咒">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/track.glb', 'model')">
+        <model-viewer src="../../assets/models/track.glb" alt="跑道3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 4: Silicon Valley 1950s -->
@@ -459,7 +508,17 @@ html, body {
       </div>
       <div class="page-num">肆</div>
     </div>
-    <div class="page-media"><img src="images/05_siliconvalley.png" alt="05 siliconvalley"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/05_siliconvalley.png', 'image')">
+        <img src="images/05_siliconvalley.png" alt="硅谷">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/garage.glb', 'model')">
+        <model-viewer src="../../assets/models/garage.glb" alt="车库3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 5: Bell Labs 1940s -->
@@ -482,14 +541,14 @@ html, body {
       <div class="page-num">伍</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/06_bell.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/06_bell.png', 'image')">
         <img src="images/06_bell.png" alt="贝尔实验室插画">
         <div class="media-label">点击放大</div>
       </div>
       <div class="media-divider"></div>
-      <div class="media-item" onclick="openModal('../../assets/models/lantern.glb', 'model')">
-        <model-viewer src="../../assets/models/lantern.glb" alt="灯笼3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
-        <div class="media-label">3D模型 · 点击全屏</div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/corridor.glb', 'model')">
+        <model-viewer src="../../assets/models/corridor.glb" alt="走廊3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
       </div>
     </div>
   </div>
@@ -512,7 +571,17 @@ html, body {
       </div>
       <div class="page-num">陆</div>
     </div>
-    <div class="page-media"><img src="images/07_roommate.png" alt="07 roommate"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/07_roommate.png', 'image')">
+        <img src="images/07_roommate.png" alt="室友效应">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/books.glb', 'model')">
+        <model-viewer src="../../assets/models/books.glb" alt="书本3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 7: Phone Presence 2017 -->
@@ -534,7 +603,17 @@ html, body {
       </div>
       <div class="page-num">柒</div>
     </div>
-    <div class="page-media"><img src="images/08_phone.png" alt="08 phone"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/08_phone.png', 'image')">
+        <img src="images/08_phone.png" alt="手机存在效应">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/phone.glb', 'model')">
+        <model-viewer src="../../assets/models/phone.glb" alt="手机3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 8: Filter Bubble 2011 -->
@@ -555,7 +634,17 @@ html, body {
       </div>
       <div class="page-num">捌</div>
     </div>
-    <div class="page-media"><img src="images/09_bubble.png" alt="09 bubble"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/09_bubble.png', 'image')">
+        <img src="images/09_bubble.png" alt="过滤气泡">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/bubble.glb', 'model')">
+        <model-viewer src="../../assets/models/bubble.glb" alt="泡泡3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 9: Context-Dependent Memory 1975 -->
@@ -576,7 +665,17 @@ html, body {
       </div>
       <div class="page-num">玖</div>
     </div>
-    <div class="page-media"><img src="images/10_diver.png" alt="10 diver"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/10_diver.png', 'image')">
+        <img src="images/10_diver.png" alt="情境依赖记忆">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/diver.glb', 'model')">
+        <model-viewer src="../../assets/models/diver.glb" alt="潜水员3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 10: Conclusion -->
@@ -606,7 +705,17 @@ html, body {
       </div>
       <div class="page-num">拾</div>
     </div>
-    <div class="page-media"><img src="images/12_ending.png" alt="12 ending"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/12_ending.png', 'image')">
+        <img src="images/12_ending.png" alt="设计你的环境">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/design_tools.glb', 'model')">
+        <model-viewer src="../../assets/models/design_tools.glb" alt="设计工具3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
 </div>

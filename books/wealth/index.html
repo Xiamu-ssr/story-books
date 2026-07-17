@@ -215,6 +215,7 @@ html, body {
 /* Cover page special style */
 .page.cover {
   background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
 }
 
 .page.cover .page-content {
@@ -222,6 +223,9 @@ html, body {
   justify-content: center;
   align-items: center;
   text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
 }
 
 .page.cover .cover-title {
@@ -246,6 +250,19 @@ html, body {
   color: #6b5d4f;
   margin-top: 40px;
   letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Navigation */
@@ -368,12 +385,14 @@ html, body {
 
   <!-- Page 0: Cover -->
   <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="历史中那些财富趣事">
+    </div>
     <div class="page-content">
       <div class="cover-title">历史中那些财富趣事</div>
       <div class="cover-subtitle">从大航海到比特币 · 400年的财富密码</div>
       <div class="cover-meta">讲给点点的 10 个故事</div>
     </div>
-    <div class="page-media full" style="position:absolute;inset:0;opacity:0.3;"><img src="images/01_cover.png" alt="cover" style="object-fit:cover;"></div>
   </div>
 
   <!-- Page 1: VOC 1602 -->
@@ -394,7 +413,17 @@ html, body {
       </div>
       <div class="page-num">壹</div>
     </div>
-    <div class="page-media"><img src="images/02_voc.png" alt="02 voc"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/02_voc.png', 'image')">
+        <img src="images/02_voc.png" alt="荷兰东印度公司">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/ship.glb', 'model')">
+        <model-viewer src="../../assets/models/ship.glb" alt="帆船3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 2: Tulip Mania 1637 -->
@@ -417,7 +446,17 @@ html, body {
       </div>
       <div class="page-num">贰</div>
     </div>
-    <div class="page-media"><img src="images/03_tulip.png" alt="03 tulip"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/03_tulip.png', 'image')">
+        <img src="images/03_tulip.png" alt="郁金香狂热">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/tulip.glb', 'model')">
+        <model-viewer src="../../assets/models/tulip.glb" alt="郁金香3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 3: Mississippi Bubble 1719 -->
@@ -439,7 +478,17 @@ html, body {
       </div>
       <div class="page-num">叁</div>
     </div>
-    <div class="page-media"><img src="images/04_mississippi.png" alt="04 mississippi"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/04_mississippi.png', 'image')">
+        <img src="images/04_mississippi.png" alt="密西西比泡沫">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/banknote.glb', 'model')">
+        <model-viewer src="../../assets/models/banknote.glb" alt="纸币3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 4: Singapore 1965 -->
@@ -465,7 +514,17 @@ html, body {
       </div>
       <div class="page-num">肆</div>
     </div>
-    <div class="page-media"><img src="images/05_singapore.png" alt="05 singapore"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/05_singapore.png', 'image')">
+        <img src="images/05_singapore.png" alt="新加坡">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/skyscraper.glb', 'model')">
+        <model-viewer src="../../assets/models/skyscraper.glb" alt="高楼3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 5: Deng 1978 -->
@@ -489,7 +548,17 @@ html, body {
       </div>
       <div class="page-num">伍</div>
     </div>
-    <div class="page-media"><img src="images/06_deng.png" alt="06 deng"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/06_deng.png', 'image')">
+        <img src="images/06_deng.png" alt="邓小平访新加坡">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/cat.glb', 'model')">
+        <model-viewer src="../../assets/models/cat.glb" alt="猫3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 6: Housing 1998 -->
@@ -514,7 +583,17 @@ html, body {
       </div>
       <div class="page-num">陆</div>
     </div>
-    <div class="page-media"><img src="images/07_house.png" alt="07 house"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/07_house.png', 'image')">
+        <img src="images/07_house.png" alt="房子的真相">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/house.glb', 'model')">
+        <model-viewer src="../../assets/models/house.glb" alt="房子3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 7: Bitcoin 2009 -->
@@ -541,12 +620,12 @@ html, body {
       <div class="page-num">柒</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/08_bitcoin.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/08_bitcoin.png', 'image')">
         <img src="images/08_bitcoin.png" alt="比特币插画">
         <div class="media-label">点击放大</div>
       </div>
       <div class="media-divider"></div>
-      <div class="media-item" onclick="openModal('../../assets/models/bitcoin.glb', 'model')">
+      <div class="media-item" ondblclick="openModal('../../assets/models/bitcoin.glb', 'model')">
         <model-viewer src="../../assets/models/bitcoin.glb" alt="比特币3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
         <div class="media-label">3D模型 · 点击全屏</div>
       </div>
@@ -571,7 +650,17 @@ html, body {
       </div>
       <div class="page-num">捌</div>
     </div>
-    <div class="page-media"><img src="images/09_data.png" alt="09 data"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/09_data.png', 'image')">
+        <img src="images/09_data.png" alt="财富数据">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/chart.glb', 'model')">
+        <model-viewer src="../../assets/models/chart.glb" alt="图表3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
   <!-- Page 9: Conclusion -->
@@ -592,7 +681,17 @@ html, body {
       </div>
       <div class="page-num">玖</div>
     </div>
-    <div class="page-media"><img src="images/10_keys.png" alt="10 keys"></div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/10_keys.png', 'image')">
+        <img src="images/10_keys.png" alt="财富的三把钥匙">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/keys.glb', 'model')">
+        <model-viewer src="../../assets/models/keys.glb" alt="钥匙3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
   </div>
 
 </div>

@@ -255,6 +255,7 @@ html, body {
 /* Cover page special style */
 .page.cover {
   background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
 }
 
 .page.cover .page-content {
@@ -262,6 +263,9 @@ html, body {
   justify-content: center;
   align-items: center;
   text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
 }
 
 .page.cover .cover-title {
@@ -286,6 +290,19 @@ html, body {
   color: #6b5d4f;
   margin-top: 40px;
   letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Navigation */
@@ -410,13 +427,13 @@ html, body {
 
   <!-- Page 0: Cover -->
   <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="偷懒改变世界">
+    </div>
     <div class="page-content">
       <div class="cover-title">偷懒改变世界</div>
       <div class="cover-subtitle">那些"懒人"发明的伟大东西</div>
       <div class="cover-meta">讲给点点的 5 个故事</div>
-    </div>
-    <div class="page-media full" style="position:absolute;inset:0;opacity:0.3;">
-      <img src="images/01_cover.png" alt="偷懒改变世界" style="object-fit:cover;">
     </div>
   </div>
 
@@ -436,9 +453,14 @@ html, body {
       <div class="page-num">壹</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/02_elevator.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/02_elevator.png', 'image')">
         <img src="images/02_elevator.png" alt="奥的斯安全电梯">
-        <div class="media-label">点击放大</div>
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/elevator.glb', 'model')">
+        <model-viewer src="../../assets/models/elevator.glb" alt="电梯3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
       </div>
     </div>
   </div>
@@ -459,9 +481,14 @@ html, body {
       <div class="page-num">贰</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/04_assembly.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/04_assembly.png', 'image')">
         <img src="images/04_assembly.png" alt="福特流水线">
-        <div class="media-label">点击放大</div>
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/assembly_line.glb', 'model')">
+        <model-viewer src="../../assets/models/assembly_line.glb" alt="流水线3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
       </div>
     </div>
   </div>
@@ -482,14 +509,14 @@ html, body {
       <div class="page-num">叁</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/06_remote.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/06_remote.png', 'image')">
         <img src="images/06_remote.png" alt="电视遥控器插画">
-        <div class="media-label">点击放大</div>
+        <div class="media-label">双击放大</div>
       </div>
       <div class="media-divider"></div>
-      <div class="media-item" onclick="openModal('../../assets/models/remote_control.glb', 'model')">
+      <div class="media-item" ondblclick="openModal('../../assets/models/remote_control.glb', 'model')">
         <model-viewer src="../../assets/models/remote_control.glb" alt="遥控器3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
-        <div class="media-label">3D模型 · 点击全屏</div>
+        <div class="media-label">3D模型 · 双击全屏</div>
       </div>
     </div>
   </div>
@@ -510,9 +537,14 @@ html, body {
       <div class="page-num">肆</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/07_container.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/07_container.png', 'image')">
         <img src="images/07_container.png" alt="集装箱">
-        <div class="media-label">点击放大</div>
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/container.glb', 'model')">
+        <model-viewer src="../../assets/models/container.glb" alt="集装箱3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
       </div>
     </div>
   </div>
@@ -536,9 +568,14 @@ html, body {
       <div class="page-num">伍</div>
     </div>
     <div class="page-media">
-      <div class="media-item" onclick="openModal('images/12_ending.png', 'image')">
+      <div class="media-item" ondblclick="openModal('images/12_ending.png', 'image')">
         <img src="images/12_ending.png" alt="偷懒的正确姿势">
-        <div class="media-label">点击放大</div>
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/lever.glb', 'model')">
+        <model-viewer src="../../assets/models/lever.glb" alt="杠杆3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
       </div>
     </div>
   </div>
