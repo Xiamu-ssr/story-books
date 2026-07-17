@@ -34,8 +34,8 @@ html, body {
 
 .page {
   position: absolute;
-  width: 92%; max-width: 900px;
-  height: 88%; max-height: 760px;
+  width: 94%; max-width: 1100px;
+  height: 88%; max-height: 800px;
   background: var(--bg-page);
   border-radius: 12px;
   box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
@@ -67,10 +67,12 @@ html, body {
 }
 
 .page-media {
-  width: 42%;
+  width: 45%;
   flex-shrink: 0;
   border-left: 1px solid rgba(201,168,76,0.2);
   background: #f0e9dc;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
@@ -78,6 +80,51 @@ html, body {
   width: 100%;
   height: 100%;
   background: transparent;
+}
+
+.media-item {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.media-item:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.media-item model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.media-label {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  pointer-events: none;
+  background: rgba(250,246,238,0.8);
+  padding: 4px 8px;
+}
+
+.media-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  flex-shrink: 0;
 }
 
 .page-media img {
@@ -302,7 +349,7 @@ html, body {
 /* Responsive */
 @media (max-width: 768px) {
   .page { flex-direction: column; height: 90%; width: 94%; }
-  .page-media { width: 100%; height: 35%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); }
+  .page-media { width: 100%; height: 40%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: row; } .media-item { flex: 1; } .media-divider { width: 1px; height: auto; }
   .page-content { padding: 24px 28px; }
   .page-title { font-size: 22px; }
   .page-body { font-size: 14px; line-height: 1.8; }
@@ -312,7 +359,7 @@ html, body {
 </head>
 <body>
 
-<a class="home-link" href="../../index.html">‹ 返回暑架</a>
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
 
 <div id="book">
 
@@ -432,7 +479,15 @@ html, body {
       <div class="page-num">伍</div>
     </div>
     <div class="page-media">
-      <model-viewer src="../../assets/models/Lantern.glb" alt="贝尔实验室的灵感之灯" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+      <div class="media-item" onclick="openModal('images/06_bell.png', 'image')">
+        <img src="images/06_bell.png" alt="贝尔实验室插画">
+        <div class="media-label">点击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" onclick="openModal('../../assets/models/lantern.glb', 'model')">
+        <model-viewer src="../../assets/models/lantern.glb" alt="灯笼3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 点击全屏</div>
+      </div>
     </div>
   </div>
 
@@ -560,6 +615,13 @@ html, body {
   <button id="nextBtn" onclick="changePage(1)">›</button>
 </div>
 
+<!-- Fullscreen Modal -->
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-hint">拖拽旋转 · 滚轮缩放 · 点击 × 关闭</div>
+</div>
+
 <!-- Progress dots -->
 <div class="dots" id="dots"></div>
 
@@ -597,19 +659,95 @@ function changePage(dir) {
   const next = currentPage + dir;
   if (next >= 0 && next < totalPages) {
     currentPage = next;
-    updateUI();
+    // Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  
+  if (type === 'image') {
+    content.innerHTML = `
+      <model-viewer 
+        src="../../assets/models/picture_frame.glb" 
+        alt="3D画框"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  } else {
+    content.innerHTML = `
+      <model-viewer 
+        src="${src}" 
+        alt="3D模型"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  }
+  
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+updateUI();
   }
 }
 
 function goToPage(i) {
   currentPage = i;
-  updateUI();
+  // Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  
+  if (type === 'image') {
+    content.innerHTML = `
+      <model-viewer 
+        src="../../assets/models/picture_frame.glb" 
+        alt="3D画框"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  } else {
+    content.innerHTML = `
+      <model-viewer 
+        src="${src}" 
+        alt="3D模型"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  }
+  
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+updateUI();
 }
 
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); } if (e.key === 'Escape') closeModal();
 });
 
 // Touch / swipe
@@ -619,6 +757,44 @@ document.addEventListener('touchend', (e) => {
   const diff = touchStartX - e.changedTouches[0].clientX;
   if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
 });
+
+// Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  
+  if (type === 'image') {
+    content.innerHTML = `
+      <model-viewer 
+        src="../../assets/models/picture_frame.glb" 
+        alt="3D画框"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  } else {
+    content.innerHTML = `
+      <model-viewer 
+        src="${src}" 
+        alt="3D模型"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  }
+  
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
 
 updateUI();
 </script>

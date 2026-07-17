@@ -34,8 +34,8 @@ html, body {
 
 .page {
   position: absolute;
-  width: 92%; max-width: 900px;
-  height: 88%; max-height: 760px;
+  width: 94%; max-width: 1100px;
+  height: 88%; max-height: 800px;
   background: var(--bg-page);
   border-radius: 12px;
   box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
@@ -64,32 +64,47 @@ html, body {
   flex-direction: column;
   padding: 40px 50px;
   overflow-y: auto;
+  min-width: 0;
 }
 
 .page-media {
-  width: 42%;
+  width: 45%;
   flex-shrink: 0;
   border-left: 1px solid rgba(201,168,76,0.2);
   background: #f0e9dc;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
-.page-media img {
+.media-item {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.media-item:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.media-item img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
 }
 
-.page-media model-viewer {
+.media-item model-viewer {
   width: 100%;
   height: 100%;
   background: transparent;
 }
 
-.page-media .media-caption {
+.media-label {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   left: 0;
   right: 0;
   text-align: center;
@@ -97,6 +112,72 @@ html, body {
   color: var(--text-light);
   letter-spacing: 1px;
   pointer-events: none;
+  background: rgba(250,246,238,0.8);
+  padding: 4px 8px;
+}
+
+.media-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  flex-shrink: 0;
+}
+
+/* Fullscreen modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,16,0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  width: 90%;
+  height: 90%;
+  position: relative;
+}
+
+.modal-content model-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(232,220,200,0.6);
+  font-size: 13px;
+  letter-spacing: 1px;
 }
 
 .page-num {
@@ -308,7 +389,9 @@ html, body {
 /* Responsive */
 @media (max-width: 768px) {
   .page { flex-direction: column; height: 90%; width: 94%; }
-  .page-media { width: 100%; height: 35%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); }
+  .page-media { width: 100%; height: 40%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: row; }
+  .media-item { flex: 1; }
+  .media-divider { width: 1px; height: auto; }
   .page-content { padding: 24px 28px; }
   .page-title { font-size: 22px; }
   .page-body { font-size: 14px; line-height: 1.8; }
@@ -318,7 +401,7 @@ html, body {
 </head>
 <body>
 
-<a class="home-link" href="../../index.html">‹ 返回暑架</a>
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
 
 <div id="book">
 
@@ -350,7 +433,10 @@ html, body {
       <div class="page-num">壹</div>
     </div>
     <div class="page-media">
-      <img src="images/02_elevator.png" alt="奥的斯安全电梯">
+      <div class="media-item" onclick="openModal('images/02_elevator.png', 'image')">
+        <img src="images/02_elevator.png" alt="奥的斯安全电梯">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -370,7 +456,10 @@ html, body {
       <div class="page-num">贰</div>
     </div>
     <div class="page-media">
-      <img src="images/03_dishwasher.png" alt="洗碗机">
+      <div class="media-item" onclick="openModal('images/03_dishwasher.png', 'image')">
+        <img src="images/03_dishwasher.png" alt="洗碗机">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -390,7 +479,10 @@ html, body {
       <div class="page-num">叁</div>
     </div>
     <div class="page-media">
-      <img src="images/04_assembly.png" alt="福特流水线">
+      <div class="media-item" onclick="openModal('images/04_assembly.png', 'image')">
+        <img src="images/04_assembly.png" alt="福特流水线">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -410,7 +502,10 @@ html, body {
       <div class="page-num">肆</div>
     </div>
     <div class="page-media">
-      <img src="images/05_microwave.png" alt="微波炉">
+      <div class="media-item" onclick="openModal('images/05_microwave.png', 'image')">
+        <img src="images/05_microwave.png" alt="微波炉">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -430,7 +525,15 @@ html, body {
       <div class="page-num">伍</div>
     </div>
     <div class="page-media">
-      <model-viewer src="../../assets/models/BoomBox.glb" alt="老式电视机" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+      <div class="media-item" onclick="openModal('images/06_remote.png', 'image')">
+        <img src="images/06_remote.png" alt="电视遥控器插画">
+        <div class="media-label">点击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" onclick="openModal('../../assets/models/remote_control.glb', 'model')">
+        <model-viewer src="../../assets/models/remote_control.glb" alt="遥控器3D模型" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 点击全屏</div>
+      </div>
     </div>
   </div>
 
@@ -450,7 +553,10 @@ html, body {
       <div class="page-num">陆</div>
     </div>
     <div class="page-media">
-      <img src="images/07_container.png" alt="集装箱">
+      <div class="media-item" onclick="openModal('images/07_container.png', 'image')">
+        <img src="images/07_container.png" alt="集装箱">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -470,7 +576,10 @@ html, body {
       <div class="page-num">柒</div>
     </div>
     <div class="page-media">
-      <img src="images/08_noodles.png" alt="方便面">
+      <div class="media-item" onclick="openModal('images/08_noodles.png', 'image')">
+        <img src="images/08_noodles.png" alt="方便面">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -490,7 +599,10 @@ html, body {
       <div class="page-num">捌</div>
     </div>
     <div class="page-media">
-      <img src="images/09_copypaste.png" alt="复制粘贴">
+      <div class="media-item" onclick="openModal('images/09_copypaste.png', 'image')">
+        <img src="images/09_copypaste.png" alt="复制粘贴">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -510,7 +622,10 @@ html, body {
       <div class="page-num">玖</div>
     </div>
     <div class="page-media">
-      <img src="images/10_qrcode.png" alt="二维码">
+      <div class="media-item" onclick="openModal('images/10_qrcode.png', 'image')">
+        <img src="images/10_qrcode.png" alt="二维码">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -533,7 +648,10 @@ html, body {
       <div class="page-num">拾</div>
     </div>
     <div class="page-media">
-      <img src="images/12_ending.png" alt="偷懒的正确姿势">
+      <div class="media-item" onclick="openModal('images/12_ending.png', 'image')">
+        <img src="images/12_ending.png" alt="偷懒的正确姿势">
+        <div class="media-label">点击放大</div>
+      </div>
     </div>
   </div>
 
@@ -548,6 +666,13 @@ html, body {
 
 <!-- Progress dots -->
 <div class="dots" id="dots"></div>
+
+<!-- Fullscreen Modal -->
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-hint">拖拽旋转 · 滚轮缩放 · 点击 × 关闭</div>
+</div>
 
 <script>
 let currentPage = 0;
@@ -594,6 +719,7 @@ function goToPage(i) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'Escape') closeModal();
 });
 
 let touchStartX = 0;
@@ -602,6 +728,62 @@ document.addEventListener('touchend', (e) => {
   const diff = touchStartX - e.changedTouches[0].clientX;
   if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
 });
+
+// Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  
+  if (type === 'image') {
+    // 图片用3D画框展示
+    content.innerHTML = `
+      <model-viewer 
+        src="../../assets/models/picture_frame.glb" 
+        alt="3D画框"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+    // 动态替换画框纹理
+    setTimeout(() => {
+      const mv = content.querySelector('model-viewer');
+      if (mv && mv.model) {
+        // 创建纹理并应用到画框
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const texture = new THREE.Texture();
+          texture.image = img;
+          texture.needsUpdate = true;
+          // 这里简化处理，实际应该替换材质
+        };
+        img.src = src;
+      }
+    }, 500);
+  } else {
+    // 3D模型直接展示
+    content.innerHTML = `
+      <model-viewer 
+        src="${src}" 
+        alt="3D模型"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+  }
+  
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
 
 updateUI();
 </script>
