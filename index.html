@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>历史中那些财富趣事</title>
+<title>弟弟的书架</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
 
@@ -11,562 +11,299 @@
 
 :root {
   --bg-dark: #1a1410;
-  --bg-page: #faf6ee;
+  --bg-card: #2c2418;
   --accent-gold: #c9a84c;
   --accent-red: #b8423a;
-  --text-dark: #2c2418;
-  --text-light: #6b5d4f;
-  --shadow: rgba(0,0,0,0.15);
+  --text-light: #e8dcc8;
+  --text-dim: #a89878;
+  --text-faint: #6b5d4f;
 }
 
 html, body {
-  width: 100%; height: 100%; overflow: hidden;
+  width: 100%; min-height: 100%;
   font-family: 'Noto Sans SC', sans-serif;
   background: var(--bg-dark);
+  color: var(--text-light);
 }
 
-#book {
-  width: 100vw; height: 100vh;
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.page {
-  position: absolute;
-  width: 92%; max-width: 900px;
-  height: 88%; max-height: 760px;
-  background: var(--bg-page);
-  border-radius: 12px;
-  box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
-  display: flex;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateX(60px) scale(0.95);
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  pointer-events: none;
-}
-
-.page.active {
-  opacity: 1;
-  transform: translateX(0) scale(1);
-  pointer-events: auto;
-}
-
-.page.prev {
-  opacity: 0;
-  transform: translateX(-60px) scale(0.95);
-}
-
-.page-content {
-  flex: 1;
+body {
   display: flex;
   flex-direction: column;
-  padding: 40px 50px;
-  overflow-y: auto;
+  align-items: center;
+  padding: 60px 20px 80px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(201,168,76,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(184,66,58,0.04) 0%, transparent 50%),
+    var(--bg-dark);
 }
 
-.page-image {
-  width: 42%;
-  flex-shrink: 0;
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+  max-width: 600px;
+}
+
+.header h1 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 6px;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 30px rgba(201,168,76,0.2);
+}
+
+.header p {
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  line-height: 1.8;
+}
+
+.header .divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  margin: 24px auto 0;
+}
+
+/* Books grid */
+.books {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+/* Book card */
+.book-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  border: 1px solid rgba(201,168,76,0.15);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.book-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(201,168,76,0.4);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 40px rgba(201,168,76,0.1);
+}
+
+.book-cover {
+  width: 100%;
+  aspect-ratio: 3/4;
   background-size: cover;
   background-position: center;
-  border-left: 1px solid rgba(201,168,76,0.2);
+  position: relative;
 }
 
-.page-image.full {
-  width: 100%;
-  height: 100%;
-  border-left: none;
-}
-
-.page-num {
+.book-cover::after {
+  content: '';
   position: absolute;
-  bottom: 20px; right: 30px;
+  inset: 0;
+  background: linear-gradient(to top, rgba(26,20,16,0.95) 0%, rgba(26,20,16,0.3) 40%, transparent 70%);
+}
+
+.book-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  z-index: 2;
+}
+
+.book-title {
   font-family: 'Noto Serif SC', serif;
-  font-size: 13px;
+  font-size: 24px;
+  font-weight: 700;
   color: var(--accent-gold);
+  margin-bottom: 8px;
   letter-spacing: 2px;
 }
 
-.page-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 6px;
-  line-height: 1.3;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: var(--text-light);
-  margin-bottom: 20px;
+.book-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
   letter-spacing: 1px;
+  margin-bottom: 12px;
+  line-height: 1.6;
 }
 
-.page-body {
-  font-size: 16px;
-  line-height: 1.9;
-  color: var(--text-dark);
-  flex: 1;
+.book-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-faint);
 }
 
-.page-body p {
-  margin-bottom: 14px;
-}
-
-.page-body .highlight {
-  background: linear-gradient(transparent 60%, rgba(201,168,76,0.25) 60%);
+.book-meta .count {
+  background: rgba(201,168,76,0.15);
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: var(--accent-gold);
   font-weight: 500;
 }
 
-.page-body .number {
-  font-family: 'Noto Serif SC', serif;
-  font-weight: 700;
-  color: var(--accent-red);
-}
-
-.page-body .quote {
-  border-left: 3px solid var(--accent-gold);
-  padding-left: 14px;
-  margin: 16px 0;
-  font-style: italic;
-  color: var(--text-light);
-}
-
-.key-takeaway {
-  margin-top: 18px;
-  padding: 14px 18px;
-  background: rgba(201,168,76,0.08);
-  border-radius: 8px;
-  border-left: 4px solid var(--accent-gold);
-  font-size: 15px;
-  color: var(--text-dark);
-}
-
-.key-takeaway strong {
-  color: var(--accent-red);
-}
-
-/* Cover page special style */
-.page.cover {
-  background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
-}
-
-.page.cover .page-content {
-  color: #e8dcc8;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.page.cover .cover-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--accent-gold);
-  margin-bottom: 16px;
-  letter-spacing: 4px;
-  text-shadow: 0 2px 20px rgba(201,168,76,0.3);
-}
-
-.page.cover .cover-subtitle {
-  font-size: 18px;
-  color: #a89878;
-  letter-spacing: 2px;
-  margin-bottom: 30px;
-}
-
-.page.cover .cover-meta {
-  font-size: 13px;
-  color: #6b5d4f;
-  margin-top: 40px;
-  letter-spacing: 1px;
-}
-
-/* Navigation */
-.nav {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+.book-meta .status {
   display: flex;
-  gap: 16px;
   align-items: center;
-  z-index: 100;
-  background: rgba(26,20,16,0.85);
-  padding: 10px 20px;
-  border-radius: 40px;
-  backdrop-filter: blur(10px);
+  gap: 4px;
 }
 
-.nav button {
-  background: var(--accent-gold);
-  color: var(--bg-dark);
-  border: none;
-  width: 40px; height: 40px;
+.book-meta .status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-  font-weight: bold;
+  background: #4a4;
 }
 
-.nav button:hover {
-  background: #e0c060;
-  transform: scale(1.1);
+/* Coming soon card */
+.book-card.coming-soon {
+  opacity: 0.5;
+  cursor: default;
+  border-style: dashed;
 }
 
-.nav button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.book-card.coming-soon:hover {
   transform: none;
+  box-shadow: none;
+  border-color: rgba(201,168,76,0.15);
 }
 
-.nav .page-indicator {
-  color: #e8dcc8;
-  font-family: 'Noto Serif SC', serif;
-  font-size: 15px;
-  min-width: 60px;
+.book-card.coming-soon .book-cover {
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-card.coming-soon .book-cover::after {
+  display: none;
+}
+
+.coming-soon-icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.book-card.coming-soon .book-info {
+  position: relative;
+  padding: 24px;
+}
+
+.book-card.coming-soon .book-title {
+  color: var(--text-faint);
+}
+
+.book-card.coming-soon .book-subtitle {
+  color: var(--text-faint);
+}
+
+.book-card.coming-soon .book-meta .status::before {
+  background: var(--text-faint);
+}
+
+/* Footer */
+.footer {
+  margin-top: 80px;
   text-align: center;
+  font-size: 13px;
+  color: var(--text-faint);
   letter-spacing: 1px;
 }
 
-/* Progress dots */
-.dots {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 100;
+.footer .heart {
+  color: var(--accent-red);
 }
-
-.dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.dot.active {
-  background: var(--accent-gold);
-  transform: scale(1.4);
-}
-
-/* Scrollbar */
-.page-content::-webkit-scrollbar { width: 5px; }
-.page-content::-webkit-scrollbar-track { background: transparent; }
-.page-content::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .page { flex-direction: column; height: 90%; width: 94%; }
-  .page-image { width: 100%; height: 35%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); }
-  .page-content { padding: 24px 28px; }
-  .page-title { font-size: 22px; }
-  .page-body { font-size: 14px; line-height: 1.8; }
-  .page.cover .cover-title { font-size: 32px; }
+@media (max-width: 640px) {
+  .header h1 { font-size: 32px; letter-spacing: 4px; }
+  .books { grid-template-columns: 1fr; gap: 24px; }
+  .book-title { font-size: 20px; }
 }
 </style>
 </head>
 <body>
 
-<div id="book">
+<div class="header">
+  <h1>弟弟的书架</h1>
+  <p>不讲大道理，只讲好故事</p>
+  <div class="divider"></div>
+</div>
 
-  <!-- Page 0: Cover -->
-  <div class="page cover active" data-page="0">
-    <div class="page-content">
-      <div class="cover-title">历史中那些财富趣事</div>
-      <div class="cover-subtitle">从大航海到比特币 · 400年的财富密码</div>
-      <div class="cover-meta">讲给弟弟的 10 个故事</div>
-    </div>
-    <div class="page-image full" style="background-image: url('images/01_cover.png'); opacity: 0.3;"></div>
-  </div>
+<div class="books">
 
-  <!-- Page 1: VOC 1602 -->
-  <div class="page" data-page="1">
-    <div class="page-content">
-      <div class="page-title">1602年，一群赌徒改变了世界</div>
-      <div class="page-subtitle">荷兰东印度公司 · 股份制的诞生</div>
-      <div class="page-body">
-        <p>16世纪末，荷兰人开始远航亚洲走私香料。一趟远航的利润能高达<span class="highlight">400%</span>，但成本也吓人——一艘船的造价相当于今天的几百万人民币，而且海上充满风险：风暴、海盗、葡萄牙海军。</p>
-        <p>沉了？<span class="highlight">全赔</span>。被打劫？<span class="highlight">全赔</span>。一个人根本扛不住。</p>
-        <p>1602年，有人出了个天才主意：<span class="highlight">把风险切碎</span>。6个商会合并，向全荷兰人募集资金，每个人出一点钱，换一张纸（股票）。赚了按比例分，亏了最多亏投入的部分。</p>
-        <p>这一下募集了 <span class="number">650万</span> 荷兰盾——相当于今天的几十亿。荷兰东印度公司（VOC）成了人类历史上第一家股份制公司。</p>
-        <p>更关键的创新来了：股票可以买卖。不想等了？把纸卖给想等的人。于是阿姆斯特丹出现了<span class="highlight">世界第一家股票交易所</span>。</p>
-        <p>VOC存在了200年，每年平均回报 <span class="number">18%</span>。</p>
-        <div class="key-takeaway">
-          <strong>核心创新：</strong>股份制把"富人才能玩的远航生意"变成了"普通人也能参与的投资"。风险共担、利益共享——这就是现代资本市场的起点。
-        </div>
+  <!-- Book 1: Wealth Stories -->
+  <a class="book-card" href="books/wealth/index.html">
+    <div class="book-cover" style="background-image: url('books/wealth/images/01_cover.png');"></div>
+    <div class="book-info">
+      <div class="book-title">历史中那些财富趣事</div>
+      <div class="book-subtitle">从大航海到比特币，400年的财富密码</div>
+      <div class="book-meta">
+        <span class="count">10 个故事</span>
+        <span class="status">已上架</span>
       </div>
-      <div class="page-num">壹</div>
     </div>
-    <div class="page-image" style="background-image: url('images/02_voc.png');"></div>
-  </div>
+  </a>
 
-  <!-- Page 2: Tulip Mania 1637 -->
-  <div class="page" data-page="2">
-    <div class="page-content">
-      <div class="page-title">1637年，一朵花比一栋房还贵</div>
-      <div class="page-subtitle">郁金香狂热 · 人类第一次泡沫</div>
-      <div class="page-body">
-        <p>VOC的成功让荷兰人尝到了投资的甜头。很快，他们的目光转向了一种花——<span class="highlight">郁金香</span>。</p>
-        <p>郁金香从土耳其引进，稀有品种是贵族的身份象征。更妙的是，一种病毒让花瓣出现了漂亮的条纹，感染的花更加稀有、更加漂亮。</p>
-        <p>价格开始疯涨：</p>
-        <p>· 一个稀有球茎 = <span class="number">一栋阿姆斯特丹运河旁的大宅</span><br>
-        · 普通品种也跟着涨，面包师、铁匠、农民都加入买卖</p>
-        <p>所有人都觉得"花会一直涨"。有人卖掉房子买花，有人用一年的收入买一个球茎。</p>
-        <p>1637年2月，在哈勒姆的一场拍卖会上，<span class="highlight">突然没有人愿意出价了</span>。</p>
-        <p>恐慌蔓延。一周之内，价格暴跌 <span class="number">90%</span>。很多花农和投机者一夜破产。</p>
-        <div class="key-takeaway">
-          <strong>教训：</strong>当所有人都觉得"只会涨"的时候，往往就是顶。郁金香狂热成了后来所有金融泡沫的原型——300年后人们依然在重复同样的故事。
-        </div>
+  <!-- Book 2: Lazy Changes World -->
+  <a class="book-card" href="books/lazy/index.html">
+    <div class="book-cover" style="background-image: url('books/lazy/images/01_cover.png');"></div>
+    <div class="book-info">
+      <div class="book-title">偷懒改变世界</div>
+      <div class="book-subtitle">那些"懒人"发明的伟大东西</div>
+      <div class="book-meta">
+        <span class="count">10 个故事</span>
+        <span class="status">已上架</span>
       </div>
-      <div class="page-num">贰</div>
     </div>
-    <div class="page-image" style="background-image: url('images/03_tulip.png');"></div>
-  </div>
+  </a>
 
-  <!-- Page 3: Mississippi Bubble 1719 -->
-  <div class="page" data-page="3">
-    <div class="page-content">
-      <div class="page-title">1719年，一个赌徒发明了纸币</div>
-      <div class="page-subtitle">密西西比泡沫 · John Law 的疯狂实验</div>
-      <div class="page-body">
-        <p>John Law 是个苏格兰人，赌徒出身，数学天才，曾在决斗中杀人坐过牢。逃到法国后，他向国王路易十四提出了一个大胆的想法：</p>
-        <p class="quote">"金属货币太笨重了。用纸币代替，国家经济就能飞起来。"</p>
-        <p>国王同意了。John Law 成立了皇家银行，开始发行纸币。同时他搞了一家"密西西比公司"，声称北美的路易斯安那<span class="highlight">遍地黄金</span>。</p>
-        <p>公司股票从 <span class="number">150</span> 里拉涨到 <span class="number">18,000</span> 里拉——12倍。巴黎一条小街挤满了抢购股票的人，有人从马上挤下来摔死，有人雇人通宵排队。</p>
-        <p>但路易斯安那没有黄金，只有沼泽和鳄鱼。</p>
-        <p>1720年，泡沫破裂。法国经济崩溃，John Law 仓皇逃出国，死在威尼斯一间小旅馆里，口袋里只剩几个硬币。</p>
-        <p>但他发明的纸币，<span class="highlight">改变了整个世界</span>。</p>
-        <div class="key-takeaway">
-          <strong>遗产：</strong>John Law 虽然失败了，但纸币这个概念留了下来。今天的欧元、美元、人民币，都可以追溯到这个赌徒的疯狂实验。
-        </div>
+  <!-- Book 3: Environment Secret -->
+  <a class="book-card" href="books/environment/index.html">
+    <div class="book-cover" style="background-image: url('books/environment/images/01_cover.png');"></div>
+    <div class="book-info">
+      <div class="book-title">环境的秘密</div>
+      <div class="book-subtitle">你以为是你在选择，其实是环境在塑造你</div>
+      <div class="book-meta">
+        <span class="count">10 个故事</span>
+        <span class="status">已上架</span>
       </div>
-      <div class="page-num">叁</div>
     </div>
-    <div class="page-image" style="background-image: url('images/04_mississippi.png');"></div>
-  </div>
+  </a>
 
-  <!-- Page 4: Singapore 1965 -->
-  <div class="page" data-page="4">
-    <div class="page-content">
-      <div class="page-title">1965年，被赶出家门的小岛</div>
-      <div class="page-subtitle">新加坡 · 用资本主义吃饱饭</div>
-      <div class="page-body">
-        <p>1965年8月9日，新加坡被马来西亚联邦<span class="highlight">踢了出去</span>。</p>
-        <p>李光耀在电视上宣布独立时，哭了。</p>
-        <p>这个岛国只有北京海淀区那么大，没有石油、没有矿产、没有农业，连喝的水都要从马来西亚买。周围还有印尼等大国虎视眈眈。</p>
-        <p>怎么活？</p>
-        <p>李光耀选择了<span class="highlight">资本主义</span>：</p>
-        <p>· 招商引资：给跨国公司免税、建厂房<br>
-        · 法治严明：贪污腐败直接坐牢，李光耀自己住公房<br>
-        · 英语教育：让国民能跟全世界做生意<br>
-        · 种族和谐：严管种族冲突，稳定压倒一切</p>
-        <p>跨国公司蜂拥而来——德州仪器、惠普、苹果……新加坡成了"亚洲工厂"。</p>
-        <p>20年，从第三世界到第一世界。人均GDP从 <span class="number">500美元</span> 涨到 <span class="number">60,000美元</span>——<span class="highlight">120倍</span>。</p>
-        <div class="key-takeaway">
-          <strong>启示：</strong>资源和面积不是关键，制度和认知才是。新加坡证明了，一个没有资源的小岛，只要用对了制度，也能变成发达国家。
-        </div>
-      </div>
-      <div class="page-num">肆</div>
+  <!-- Book 4: Coming Soon -->
+  <div class="book-card coming-soon">
+    <div class="book-cover">
+      <div class="coming-soon-icon">📖</div>
     </div>
-    <div class="page-image" style="background-image: url('images/05_singapore.png');"></div>
-  </div>
-
-  <!-- Page 5: Deng 1978 -->
-  <div class="page" data-page="5">
-    <div class="page-content">
-      <div class="page-title">1978年，邓小平去新加坡取经</div>
-      <div class="page-subtitle">黑猫白猫 · 中国市场经济的开端</div>
-      <div class="page-body">
-        <p>1978年11月，74岁的邓小平访问新加坡。</p>
-        <p>他看到了什么？一群华人，在同样一个弹丸小岛上，用资本主义搞成了发达国家。工厂繁忙、港口繁荣、人民富足。</p>
-        <p>这对邓小平的冲击是巨大的——<span class="highlight">华人也能搞成这样</span>。</p>
-        <p>回国后不久，改革开放启动。邓小平说了一句后来家喻户晓的话：</p>
-        <p class="quote">"不管黑猫白猫，抓到老鼠就是好猫。"</p>
-        <p>意思是：别管什么主义不主义，能让老百姓过上好日子的方法就是好方法。</p>
-        <p>但很多人没听懂这句话。</p>
-        <p>他们太执着于"社会主义"的概念，以为国家会永远包办一切——包括房子。房子是国家分的福利，怎么会涨价呢？</p>
-        <p>结果呢？下一个故事告诉你。</p>
-        <div class="key-takeaway">
-          <strong>关键：</strong>邓小平看懂了——制度是工具，不是信仰。谁能在合适的时候用合适的工具，谁就赢。
-        </div>
+    <div class="book-info">
+      <div class="book-title">下一本</div>
+      <div class="book-subtitle">主题待定，敬请期待</div>
+      <div class="book-meta">
+        <span class="count">? 个故事</span>
+        <span class="status">筹备中</span>
       </div>
-      <div class="page-num">伍</div>
     </div>
-    <div class="page-image" style="background-image: url('images/06_deng.png');"></div>
-  </div>
-
-  <!-- Page 6: Housing 1998 -->
-  <div class="page" data-page="6">
-    <div class="page-content">
-      <div class="page-title">1998年，房子的真相</div>
-      <div class="page-subtitle">房子是金融品，不是福利</div>
-      <div class="page-body">
-        <p>1998年，中国取消福利分房，住房正式商品化。房子变成了可以买卖的东西。</p>
-        <p>但很多人没转过弯来。他们觉得：房子就是住的，国家不会让房价涨的。</p>
-        <p>这是天大的误解。房子的本质是<span class="highlight">金融品</span>，不是福利。</p>
-        <p>为什么？因为在信用货币时代，国家不断印钞票，钱越来越薄。2020年中国的M2（广义货币）是2000年的 <span class="number">15倍</span>。钱多了，资产价格必然上涨——房子就是最大的资产之一。</p>
-        <p>看看北京房价：</p>
-        <p>· 2000年：约 <span class="number">2,000</span> 元/㎡<br>
-        · 2010年：约 <span class="number">20,000</span> 元/㎡<br>
-        · 2020年：约 <span class="number">60,000</span> 元/㎡</p>
-        <p>20年涨了 <span class="number">30倍</span>。不是房子变贵了，是<span class="highlight">钱变薄了</span>。</p>
-        <p>那些早看懂的人，贷款买房，赚了几十倍。那些等着"国家分房"的人，永远等不到了。这就是"过度拟合社会主义"的代价。</p>
-        <div class="key-takeaway">
-          <strong>底层逻辑：</strong>房子 = 居住功能 + 金融功能。只看到居住的人亏了，看懂金融属性的人赚了。财富的差距，往往就差在认知上。
-        </div>
-      </div>
-      <div class="page-num">陆</div>
-    </div>
-    <div class="page-image" style="background-image: url('images/07_house.png');"></div>
-  </div>
-
-  <!-- Page 7: Bitcoin 2009 -->
-  <div class="page" data-page="7">
-    <div class="page-content">
-      <div class="page-title">2009年，一段代码值五千亿</div>
-      <div class="page-subtitle">比特币 · 数字黄金的诞生</div>
-      <div class="page-body">
-        <p>2008年金融危机，全球信任崩塌。一个叫"中本聪"的神秘人物（没人知道他是谁）发布了一篇论文，提出一个疯狂的想法：</p>
-        <p class="quote">"能不能有一种钱，不需要银行，不需要国家，谁也印不了？"</p>
-        <p>2009年1月3日，他/她/它挖出了第一个区块——创世区块。比特币诞生了。</p>
-        <p>比特币的规则写死在代码里：总量 <span class="number">2100万</span> 枚，永不增发。谁也不能多印。每10分钟产生一批，越来越难挖，2140年挖完。</p>
-        <p>最早比特币一文不值。2010年有人用 <span class="number">10,000</span> 个比特币买了两个披萨——这是第一笔交易。</p>
-        <p>然后价格开始狂飙：</p>
-        <p>· 2013年：突破 <span class="number">1,000</span> 美元<br>
-        · 2017年：突破 <span class="number">20,000</span> 美元<br>
-        · 2021年：突破 <span class="number">60,000</span> 美元</p>
-        <p>总市值最高超过 <span class="number">1万亿</span> 美元。一段代码，值五千亿。</p>
-        <p>比特币是不是泡沫？也许。但它开创了一个新时代：<span class="highlight">财富不再只依赖国家和银行</span>。</p>
-        <div class="key-takeaway">
-          <strong>新财富：</strong>从荷兰船队到比特币，400年来财富的形式在变（船→花→纸币→房子→数字），但底层逻辑没变：稀缺 + 共识 = 价值。
-        </div>
-      </div>
-      <div class="page-num">柒</div>
-    </div>
-    <div class="page-image" style="background-image: url('images/08_bitcoin.png');"></div>
-  </div>
-
-  <!-- Page 8: Wealth Data -->
-  <div class="page" data-page="8">
-    <div class="page-content">
-      <div class="page-title">财富的数据密码</div>
-      <div class="page-subtitle">用数字看世界 · 不靠感觉靠事实</div>
-      <div class="page-body">
-        <p>讲了这么多故事，让我们用数据来验证一下：</p>
-        <p><span class="highlight">财富分布：</span>全球最富 <span class="number">1%</span> 的人，拥有全球 <span class="number">50%</span> 的财富。最富 <span class="number">10%</span> 的人拥有 <span class="number">85%</span>。剩下90%的人分15%。</p>
-        <p><span class="highlight">货币贬值：</span>中国M2（广义货币）2000年约13万亿，2024年约300万亿——<span class="number">23倍</span>。你的钱如果存在银行，购买力每年被通胀吃掉约 <span class="number">3-5%</span>。</p>
-        <p><span class="highlight">资产回报：</span>沪深300指数过去20年年化约 <span class="number">8%</span>。一线城市房产过去20年涨了 <span class="number">15-30倍</span>。而银行存款利率现在不到 <span class="number">2%</span>——跑不赢通胀。</p>
-        <p><span class="highlight">贫富差距的根源：</span>穷人只存钱（被通胀吃掉），富人买资产（享受增值）。差距年复一年拉大。</p>
-        <p>数据不会骗人：<span class="highlight">持有优质资产的人，永远比只存钱的人富得快</span>。</p>
-        <div class="key-takeaway">
-          <strong>公式：</strong>工资（线性增长）+ 资产（指数增长）+ 时间（复利效应）= 财富。缺一不可。
-        </div>
-      </div>
-      <div class="page-num">捌</div>
-    </div>
-    <div class="page-image" style="background-image: url('images/09_data.png');"></div>
-  </div>
-
-  <!-- Page 9: Conclusion -->
-  <div class="page" data-page="9">
-    <div class="page-content">
-      <div class="page-title">财富的三把钥匙</div>
-      <div class="page-subtitle">从1602到2026，400年没变的底层逻辑</div>
-      <div class="page-body">
-        <p>回顾这9个故事，你会发现财富的底层逻辑其实很简单。三把钥匙：</p>
-        <p><span class="number">① 理解风险</span></p>
-        <p>荷兰人把风险切碎，发明了股份制。郁金香和密西西比泡沫告诉你：没有风险的收益是幻觉。谁承诺你"稳赚不赔"，谁就是在骗你。风险不是用来回避的，是用来管理的。</p>
-        <p><span class="number">② 理解时间</span></p>
-        <p>新加坡用20年从穷国变富国。北京房价用20年涨30倍。爱因斯坦说复利是"世界第八大奇迹"。时间是普通人最大的武器——但只有持有资产，时间才站在你这边。存钱的话，时间是你的敌人。</p>
-        <p><span class="number">③ 理解信用</span></p>
-        <p>John Law 发明纸币，比特币挑战法币——本质上都是关于"信用"的故事。钱的本质不是金银，是<span class="highlight">信任</span>。信任国家，钱就有价值；不信任，钱就是废纸。</p>
-        <p>400年前荷兰人用船冒险，今天你用认知冒险。工具变了，逻辑没变。</p>
-        <p class="quote" style="font-size: 18px; text-align: center; border-left: none; padding: 20px; color: var(--text-dark);">认知决定财富。<br>你看到的世界，和别人不一样，你的财富就不一样。</p>
-      </div>
-      <div class="page-num">玖</div>
-    </div>
-    <div class="page-image" style="background-image: url('images/10_keys.png');"></div>
   </div>
 
 </div>
 
-<!-- Navigation -->
-<div class="nav">
-  <button id="prevBtn" onclick="changePage(-1)">‹</button>
-  <span class="page-indicator" id="indicator">1 / 10</span>
-  <button id="nextBtn" onclick="changePage(1)">›</button>
+<div class="footer">
+  用故事代替说教 <span class="heart">·</span> 用好奇心代替焦虑
 </div>
 
-<!-- Progress dots -->
-<div class="dots" id="dots"></div>
-
-<script>
-let currentPage = 0;
-const totalPages = 10;
-const pages = document.querySelectorAll('.page');
-
-// Build dots
-const dotsContainer = document.getElementById('dots');
-for (let i = 0; i < totalPages; i++) {
-  const dot = document.createElement('div');
-  dot.className = 'dot' + (i === 0 ? ' active' : '');
-  dot.onclick = () => goToPage(i);
-  dotsContainer.appendChild(dot);
-}
-
-function updateUI() {
-  document.getElementById('indicator').textContent = `${currentPage + 1} / ${totalPages}`;
-  document.getElementById('prevBtn').disabled = currentPage === 0;
-  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
-
-  pages.forEach((p, i) => {
-    p.classList.remove('active', 'prev');
-    if (i === currentPage) p.classList.add('active');
-    else if (i < currentPage) p.classList.add('prev');
-  });
-
-  document.querySelectorAll('.dot').forEach((d, i) => {
-    d.classList.toggle('active', i === currentPage);
-  });
-}
-
-function changePage(dir) {
-  const next = currentPage + dir;
-  if (next >= 0 && next < totalPages) {
-    currentPage = next;
-    updateUI();
-  }
-}
-
-function goToPage(i) {
-  currentPage = i;
-  updateUI();
-}
-
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
-});
-
-// Touch / swipe
-let touchStartX = 0;
-document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
-document.addEventListener('touchend', (e) => {
-  const diff = touchStartX - e.changedTouches[0].clientX;
-  if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
-});
-
-updateUI();
-</script>
 </body>
 </html>

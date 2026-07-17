@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>环境的秘密</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1410;
+  --bg-page: #faf6ee;
+  --accent-gold: #c9a84c;
+  --accent-red: #b8423a;
+  --text-dark: #2c2418;
+  --text-light: #6b5d4f;
+  --shadow: rgba(0,0,0,0.15);
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg-dark);
+}
+
+#book {
+  width: 100vw; height: 100vh;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.page {
+  position: absolute;
+  width: 92%; max-width: 900px;
+  height: 88%; max-height: 760px;
+  background: var(--bg-page);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
+  display: flex;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(60px) scale(0.95);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
+}
+
+.page.prev {
+  opacity: 0;
+  transform: translateX(-60px) scale(0.95);
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 50px;
+  overflow-y: auto;
+}
+
+.page-image {
+  width: 42%;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  border-left: 1px solid rgba(201,168,76,0.2);
+}
+
+.page-image.full {
+  width: 100%;
+  height: 100%;
+  border-left: none;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 20px; right: 30px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+}
+
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.page-body {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.page-body p {
+  margin-bottom: 14px;
+}
+
+.page-body .highlight {
+  background: linear-gradient(transparent 60%, rgba(201,168,76,0.25) 60%);
+  font-weight: 500;
+}
+
+.page-body .number {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+  color: var(--accent-red);
+}
+
+.page-body .quote {
+  border-left: 3px solid var(--accent-gold);
+  padding-left: 14px;
+  margin: 16px 0;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.key-takeaway {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-gold);
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.key-takeaway strong {
+  color: var(--accent-red);
+}
+
+/* Cover page special style */
+.page.cover {
+  background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+}
+
+.page.cover .page-content {
+  color: #e8dcc8;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.page.cover .cover-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 20px rgba(201,168,76,0.3);
+}
+
+.page.cover .cover-subtitle {
+  font-size: 18px;
+  color: #a89878;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+.page.cover .cover-meta {
+  font-size: 13px;
+  color: #6b5d4f;
+  margin-top: 40px;
+  letter-spacing: 1px;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 100;
+  background: rgba(26,20,16,0.85);
+  padding: 10px 20px;
+  border-radius: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.nav button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.nav button:hover {
+  background: #e0c060;
+  transform: scale(1.1);
+}
+
+.nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav .page-indicator {
+  color: #e8dcc8;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Home link */
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: rgba(232,220,200,0.6);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(26,20,16,0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+
+.home-link:hover {
+  color: var(--accent-gold);
+  background: rgba(26,20,16,0.85);
+}
+
+/* Progress dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  background: var(--accent-gold);
+  transform: scale(1.4);
+}
+
+/* Scrollbar */
+.page-content::-webkit-scrollbar { width: 5px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page { flex-direction: column; height: 90%; width: 94%; }
+  .page-image { width: 100%; height: 35%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); }
+  .page-content { padding: 24px 28px; }
+  .page-title { font-size: 22px; }
+  .page-body { font-size: 14px; line-height: 1.8; }
+  .page.cover .cover-title { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
+
+<div id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="page-content">
+      <div class="cover-title">环境的秘密</div>
+      <div class="cover-subtitle">你以为是你在选择，其实是环境在塑造你</div>
+      <div class="cover-meta">讲给弟弟的 10 个故事</div>
+    </div>
+    <div class="page-image full" style="background-image: url('images/01_cover.png'); opacity: 0.3;"></div>
+  </div>
+
+  <!-- Page 1: Broken Windows 1982 -->
+  <div class="page" data-page="1">
+    <div class="page-content">
+      <div class="page-title">1982年，一扇破窗户的启示</div>
+      <div class="page-subtitle">破窗效应 · 环境会"传染"</div>
+      <div class="page-body">
+        <p>1982年，美国犯罪学家威尔逊和凯林做了个实验：把一辆完好的汽车停在 Bronx 贫民区，<span class="highlight">一周内被拆得只剩骨架</span>。</p>
+        <p>然后他们把同一辆车停在 Palo Alto 富人区，<span class="highlight">一周过去，没人碰</span>。</p>
+        <p>接着他们故意把车窗打破一个小洞。结果？<span class="highlight">几小时内，车就被拆了</span>。</p>
+        <p>这就是著名的"破窗效应"：一个破窗户如果不修，很快整栋楼的窗户都会被打破。涂鸦不擦掉，很快整面墙都是涂鸦。垃圾不清理，很快整条街都是垃圾。</p>
+        <p>环境会给人暗示：<span class="highlight">"这里没人管，你可以乱来"</span>。</p>
+        <p>反过来，干净的环境也在暗示："这里有人管，你最好规矩点。"</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>你的房间乱不乱、书桌整不整洁、手机桌面干不干净……这些都在悄悄影响你的状态。想改变状态，先改变环境。
+        </div>
+      </div>
+      <div class="page-num">壹</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/02_subway.png');"></div>
+  </div>
+
+  <!-- Page 2: Rosenthal 1968 -->
+  <div class="page" data-page="2">
+    <div class="page-content">
+      <div class="page-title">1968年，老师的一个眼神</div>
+      <div class="page-subtitle">罗森塔尔效应 · 期待的力量</div>
+      <div class="page-body">
+        <p>1968年，心理学家罗森塔尔来到一所小学，做了个"未来发展趋势测验"。</p>
+        <p>测验完，他随机挑了 <span class="number">20%</span> 的学生，告诉老师："这些孩子是'最有发展前途者'。"</p>
+        <p>注意：他是<span class="highlight">随机挑的</span>，跟测验成绩无关。</p>
+        <p>8个月后，奇迹发生了：被点名的那20%学生，成绩<span class="highlight">显著进步</span>，性格更开朗，求知欲更强。</p>
+        <p>为什么？因为老师知道"这些孩子有前途"后，<span class="highlight">不自觉地给了更多关注、更多鼓励、更多耐心</span>。一个眼神、一个微笑、一次提问，都在传递"我相信你"。</p>
+        <p>学生感受到了这种期待，就真的变成了期待的样子。</p>
+        <p>这就是"罗森塔尔效应"，也叫"皮格马利翁效应"：<span class="highlight">你期待什么，就得到什么</span>。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>你身边的人对你的期待，就是一种环境。如果周围人都觉得"你不行"，你很难行；如果周围人都觉得"你可以"，你真的可以。
+        </div>
+      </div>
+      <div class="page-num">贰</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/03_rosenthal.png');"></div>
+  </div>
+
+  <!-- Page 3: 4-Minute Mile 1954 -->
+  <div class="page" data-page="3">
+    <div class="page-content">
+      <div class="page-title">1954年，4分钟魔咒被打破</div>
+      <div class="page-subtitle">罗杰·班尼斯特 · 信念的天花板</div>
+      <div class="page-body">
+        <p>1954年之前，全世界都认为：<span class="highlight">人类不可能在4分钟内跑完1英里</span>（约1609米）。</p>
+        <p>生理学家说：人的心肺功能达不到。医学家说：尝试会猝死。这个"4分钟魔咒"像一堵墙，挡在所有运动员面前。</p>
+        <p>1954年5月6日，英国医学生罗杰·班尼斯特在牛津大学的跑道上，跑出了 <span class="number">3分59秒4</span>。</p>
+        <p>魔咒破了。</p>
+        <p>神奇的是：班尼斯特破纪录后 <span class="number">46天</span>，澳大利亚选手兰迪也破了。接下来 <span class="number">3年</span>，又有 <span class="number">16人</span> 破了4分钟。</p>
+        <p>难道人类突然进化了？不是。是<span class="highlight">"不可能"的信念被打破了</span>。一旦有人证明"可以"，其他人就知道"我也可以"。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>你身边的"天花板"往往是你自己的天花板。如果你身边都是"考不上好大学"的人，你很难相信自己能考上。找到那些"已经做到"的人，你的天花板就破了。
+        </div>
+      </div>
+      <div class="page-num">叁</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/04_mile.png');"></div>
+  </div>
+
+  <!-- Page 4: Silicon Valley 1950s -->
+  <div class="page" data-page="4">
+    <div class="page-content">
+      <div class="page-title">1950年代，车库里的革命</div>
+      <div class="page-subtitle">硅谷 · 为什么偏偏是这里？</div>
+      <div class="page-body">
+        <p>1950年代，加州旧金山南边有一片果园，叫"圣克拉拉谷"。这里阳光好、地价便宜，还有斯坦福大学。</p>
+        <p>斯坦福有个教授叫特曼，他鼓励学生：<span class="highlight">别去东海岸大公司打工，留下来创业</span>。</p>
+        <p>1939年，他的两个学生休利特和帕卡德，在自家车库里用 <span class="number">538美元</span> 创办了惠普（HP）。</p>
+        <p>1957年，8个年轻人从肖克利半导体实验室"叛逃"，创办了仙童半导体。这8个人后来被称为"八叛逆"，他们又创办了英特尔、AMD、凯鹏华盈……</p>
+        <p>1976年，乔布斯和沃兹尼亚克在乔布斯家的车库里，组装出了第一台苹果电脑。</p>
+        <p>为什么偏偏是这里？因为这里形成了一种<span class="highlight">"创业环境"</span>：失败不丢人、跳槽很正常、车库也能出奇迹、年轻人敢想敢干。</p>
+        <p>在这种环境里，你想不创业都难。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>为什么硅谷出苹果、谷歌、Facebook？不是因为那里的人更聪明，而是因为那里的环境让"疯狂想法"变得正常。你所在的圈子，决定了你敢想什么。
+        </div>
+      </div>
+      <div class="page-num">肆</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/05_siliconvalley.png');"></div>
+  </div>
+
+  <!-- Page 5: Bell Labs 1940s -->
+  <div class="page" data-page="5">
+    <div class="page-content">
+      <div class="page-title">1940年代，一条走廊的魔力</div>
+      <div class="page-subtitle">贝尔实验室 · 碰撞出天才</div>
+      <div class="page-body">
+        <p>贝尔实验室是20世纪最伟大的研究机构，出了 <span class="number">15个</span> 诺贝尔奖、晶体管、激光、信息论、Unix、C语言……</p>
+        <p>它的秘密武器是什么？<span class="highlight">一条超长的走廊</span>。</p>
+        <p>贝尔实验室的建筑设计很特别：办公室分布在一条长长的走廊两侧，你去任何地方都要经过这条走廊。</p>
+        <p>结果呢？物理学家去食堂的路上，会碰到数学家；化学家去洗手间的路上，会碰到工程师。他们停下来聊几句，<span class="highlight">火花就碰撞出来了</span>。</p>
+        <p>晶体管的发明者之一肖克利说：</p>
+        <p class="quote">"我们不是在办公室里想出晶体管的，是在走廊里聊出来的。"</p>
+        <p>贝尔实验室还规定：午餐时间必须去食堂，不能在办公室吃。为什么？因为食堂是另一个"碰撞场"。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>好的环境会"强迫"你遇到不同的人、听到不同的想法。如果你每天只跟同一个人说话、只看同一种内容，你的思维会越来越窄。
+        </div>
+      </div>
+      <div class="page-num">伍</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/06_bell.png');"></div>
+  </div>
+
+  <!-- Page 6: Roommate Effect -->
+  <div class="page" data-page="6">
+    <div class="page-content">
+      <div class="page-title">你的室友，决定了你的GPA</div>
+      <div class="page-subtitle">室友效应 · 近朱者赤的科学证明</div>
+      <div class="page-body">
+        <p>经济学家萨切尔多特研究了达特茅斯学院的 <span class="number">1589名</span> 新生，发现一个惊人规律：</p>
+        <p>如果你的室友爱学习，你的GPA会<span class="highlight">显著提高</span>；如果你的室友爱打游戏，你的GPA会<span class="highlight">显著下降</span>。</p>
+        <p>更神奇的是：这种影响是<span class="highlight">双向的</span>。爱学习的室友会被爱游戏的室友拉低，爱游戏的室友会被爱学习的室友拉高。</p>
+        <p>谁的影响更大？<span class="highlight">取决于谁更坚定</span>。</p>
+        <p>另一项研究发现：如果你的室友带了一台游戏机，你的GPA平均下降 <span class="number">0.2</span>。如果你的室友带了一堆书，你的GPA平均上升 <span class="number">0.1</span>。</p>
+        <p>这就是"室友效应"：你不需要刻意模仿室友，但<span class="highlight">环境会潜移默化地影响你</span>。他熬夜你也熬夜，他早起你也早起，他刷题你也刷题。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>选择室友、选择同桌、选择朋友，本质上是在选择环境。你想成为什么样的人，就靠近什么样的人。
+        </div>
+      </div>
+      <div class="page-num">陆</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/07_roommate.png');"></div>
+  </div>
+
+  <!-- Page 7: Phone Presence 2017 -->
+  <div class="page" data-page="7">
+    <div class="page-content">
+      <div class="page-title">2017年，手机放在旁边就变笨</div>
+      <div class="page-subtitle">手机存在效应 · 看不见的干扰</div>
+      <div class="page-body">
+        <p>2017年，德州大学做了个实验：让 <span class="number">800名</span> 学生做认知测试，测试前把手机放在三个地方：</p>
+        <p>· 第一组：手机放<span class="highlight">另一个房间</span><br>
+        · 第二组：手机放<span class="highlight">口袋里</span>（静音）<br>
+        · 第三组：手机放<span class="highlight">桌面上</span>（静音、屏幕朝下）</p>
+        <p>结果：手机放另一个房间的学生，成绩<span class="highlight">显著最好</span>。手机放桌面上的学生，成绩<span class="highlight">最差</span>——即使手机是静音的、屏幕朝下的、他们根本没看。</p>
+        <p>为什么？因为手机的存在本身就在<span class="highlight">消耗你的认知资源</span>。你的大脑会不自觉地分出一部分注意力去"监控"手机：会不会有消息？要不要看一眼？</p>
+        <p>这种"认知泄漏"是隐形的，你感觉不到，但它真实存在。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>想专注学习？把手机放另一个房间，或者至少放进抽屉里。看不见，才不想。环境设计比意志力更靠谱。
+        </div>
+      </div>
+      <div class="page-num">柒</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/08_phone.png');"></div>
+  </div>
+
+  <!-- Page 8: Filter Bubble 2011 -->
+  <div class="page" data-page="8">
+    <div class="page-content">
+      <div class="page-title">2011年，你被困在信息泡泡里</div>
+      <div class="page-subtitle">过滤气泡 · 算法在塑造你的世界观</div>
+      <div class="page-body">
+        <p>2011年，互联网活动家伊莱·帕里泽提出一个概念：<span class="highlight">过滤气泡</span>（Filter Bubble）。</p>
+        <p>他发现：谷歌、Facebook、抖音、B站……这些平台的算法会根据你的点击、点赞、停留时间，<span class="highlight">只给你看你喜欢的内容</span>。</p>
+        <p>你喜欢看游戏视频？好，首页全是游戏。你喜欢看搞笑段子？好，首页全是段子。你点赞了一条"读书无用论"？好，接下来全是"读书无用"。</p>
+        <p>久而久之，你被困在一个<span class="highlight">信息泡泡</span>里，以为全世界都跟你想的一样。</p>
+        <p>帕里泽做了个实验：让两个朋友同时搜"埃及"，一个人看到的是"埃及旅游攻略"，另一个人看到的是"埃及政治动荡"。同一个词，完全不同的世界。</p>
+        <p>算法没有恶意，它只是想让你"爽"。但结果是：<span class="highlight">你的世界观被算法悄悄塑造了</span>。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>你刷的每一个视频、点的每一个赞，都在训练算法给你打造一个"舒适泡泡"。想破泡泡？主动关注一些你不认同的账号，读一些你不喜欢的观点。
+        </div>
+      </div>
+      <div class="page-num">捌</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/09_bubble.png');"></div>
+  </div>
+
+  <!-- Page 9: Context-Dependent Memory 1975 -->
+  <div class="page" data-page="9">
+    <div class="page-content">
+      <div class="page-title">1975年，潜水员在水下背单词</div>
+      <div class="page-subtitle">情境依赖记忆 · 在哪里学，在哪里考</div>
+      <div class="page-body">
+        <p>1975年，心理学家戈登和巴德利做了个奇葩实验：让潜水员<span class="highlight">在水下背单词</span>。</p>
+        <p>他们把潜水员分成两组：一组在水下学习单词，一组在陆地上学习。然后测试记忆效果。</p>
+        <p>结果：<span class="highlight">在水下学的，在水下考得好；在陆地学的，在陆地考得好</span>。如果水下学的到陆地考，成绩下降 <span class="number">30%</span>。</p>
+        <p>这就是"情境依赖记忆"：你的记忆跟学习环境绑定在一起。教室的气味、座位的位置、背景的声音……这些都在帮你记忆。</p>
+        <p>所以有个实用建议：<span class="highlight">在考试的环境里学习</span>。如果你在教室考试，就在教室复习；如果你在安静的房间考试，就在安静的房间复习。</p>
+        <p>反过来，如果你总是在床上学习，你的大脑会把"床"跟"学习"绑定——然后你躺在床上就睡不着了。</p>
+        <div class="key-takeaway">
+          <strong>环境逻辑：</strong>环境不只是背景，它是记忆的一部分。想记得牢？固定你的学习环境。想睡得好？床只用来睡觉，别在床上刷手机。
+        </div>
+      </div>
+      <div class="page-num">玖</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/10_diver.png');"></div>
+  </div>
+
+  <!-- Page 10: Conclusion -->
+  <div class="page" data-page="10">
+    <div class="page-content">
+      <div class="page-title">设计你的环境</div>
+      <div class="page-subtitle">你不是环境的受害者，你是环境的设计师</div>
+      <div class="page-body">
+        <p>讲了9个故事，你会发现一个真相：<span class="highlight">环境的力量，比意志力大得多</span>。</p>
+        <p>破窗效应告诉你：乱的环境会"传染"乱的行为。</p>
+        <p>罗森塔尔效应告诉你：别人的期待会塑造你。</p>
+        <p>4分钟魔咒告诉你：身边的天花板就是你的天花板。</p>
+        <p>硅谷和贝尔实验室告诉你：好的环境让天才碰撞出火花。</p>
+        <p>室友效应告诉你：近朱者赤，近墨者黑。</p>
+        <p>手机存在效应告诉你：看不见的干扰最可怕。</p>
+        <p>过滤气泡告诉你：算法在悄悄塑造你的世界观。</p>
+        <p>情境依赖记忆告诉你：环境是记忆的一部分。</p>
+        <p>那怎么办？<span class="highlight">设计你的环境</span>。</p>
+        <p>想读书？把书放在枕头边、沙发上、餐桌上——让书"包围"你。</p>
+        <p>想运动？把跑鞋放在门口，把瑜伽垫铺在客厅——让运动"触手可及"。</p>
+        <p>想专注？把手机放另一个房间，把书桌收拾干净——让干扰"消失"。</p>
+        <p>想变优秀？靠近那些你想成为的人——让他们的期待"传染"你。</p>
+        <p class="quote" style="font-size: 18px; text-align: center; border-left: none; padding: 20px; color: var(--text-dark);">你以为是你在选择环境，<br>其实是环境在选择你。<br>但你可以反过来，<br>选择你的环境。</p>
+        <div class="key-takeaway">
+          <strong>终极问题：</strong>你现在所处的环境，是在帮你成为你想成为的人，还是在拖你后腿？写下来，然后改变它。
+        </div>
+      </div>
+      <div class="page-num">拾</div>
+    </div>
+    <div class="page-image" style="background-image: url('images/12_ending.png');"></div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changePage(-1)">‹</button>
+  <span class="page-indicator" id="indicator">1 / 11</span>
+  <button id="nextBtn" onclick="changePage(1)">›</button>
+</div>
+
+<!-- Progress dots -->
+<div class="dots" id="dots"></div>
+
+<script>
+let currentPage = 0;
+const totalPages = 11;
+const pages = document.querySelectorAll('.page');
+
+// Build dots
+const dotsContainer = document.getElementById('dots');
+for (let i = 0; i < totalPages; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToPage(i);
+  dotsContainer.appendChild(dot);
+}
+
+function updateUI() {
+  document.getElementById('indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+
+  pages.forEach((p, i) => {
+    p.classList.remove('active', 'prev');
+    if (i === currentPage) p.classList.add('active');
+    else if (i < currentPage) p.classList.add('prev');
+  });
+
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentPage);
+  });
+}
+
+function changePage(dir) {
+  const next = currentPage + dir;
+  if (next >= 0 && next < totalPages) {
+    currentPage = next;
+    updateUI();
+  }
+}
+
+function goToPage(i) {
+  currentPage = i;
+  updateUI();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+});
+
+// Touch / swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
+});
+
+updateUI();
+</script>
+</body>
+</html>
