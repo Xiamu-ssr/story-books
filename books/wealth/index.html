@@ -42,20 +42,23 @@ html, body {
   display: flex;
   overflow: hidden;
   opacity: 0;
-  transform: translateX(60px) scale(0.95);
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: translateX(100px) rotateY(8deg) scale(0.92);
+  transform-origin: left center;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   pointer-events: none;
+  backface-visibility: hidden;
 }
 
 .page.active {
   opacity: 1;
-  transform: translateX(0) scale(1);
+  transform: translateX(0) rotateY(0) scale(1);
   pointer-events: auto;
 }
 
 .page.prev {
   opacity: 0;
-  transform: translateX(-60px) scale(0.95);
+  transform: translateX(-100px) rotateY(-8deg) scale(0.92);
+  transform-origin: right center;
 }
 
 .page-content {
@@ -368,7 +371,7 @@ html, body {
     <div class="page-content">
       <div class="cover-title">历史中那些财富趣事</div>
       <div class="cover-subtitle">从大航海到比特币 · 400年的财富密码</div>
-      <div class="cover-meta">讲给弟弟的 10 个故事</div>
+      <div class="cover-meta">讲给点点的 10 个故事</div>
     </div>
     <div class="page-media full" style="position:absolute;inset:0;opacity:0.3;"><img src="images/01_cover.png" alt="cover" style="object-fit:cover;"></div>
   </div>
@@ -645,95 +648,20 @@ function changePage(dir) {
   const next = currentPage + dir;
   if (next >= 0 && next < totalPages) {
     currentPage = next;
-    // Modal functions
-function openModal(src, type) {
-  const modal = document.getElementById('modal');
-  const content = document.getElementById('modalContent');
-  
-  if (type === 'image') {
-    content.innerHTML = `
-      <model-viewer 
-        src="../../assets/models/picture_frame.glb" 
-        alt="3D画框"
-        camera-controls 
-        auto-rotate
-        shadow-intensity="1"
-        exposure="1"
-        style="width:100%;height:100%;--poster-color: transparent;">
-      </model-viewer>
-    `;
-  } else {
-    content.innerHTML = `
-      <model-viewer 
-        src="${src}" 
-        alt="3D模型"
-        camera-controls 
-        auto-rotate
-        shadow-intensity="1"
-        exposure="1"
-        style="width:100%;height:100%;--poster-color: transparent;">
-      </model-viewer>
-    `;
-  }
-  
-  modal.classList.add('active');
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('active');
-}
-
-updateUI();
+    updateUI();
   }
 }
 
 function goToPage(i) {
   currentPage = i;
-  // Modal functions
-function openModal(src, type) {
-  const modal = document.getElementById('modal');
-  const content = document.getElementById('modalContent');
-  
-  if (type === 'image') {
-    content.innerHTML = `
-      <model-viewer 
-        src="../../assets/models/picture_frame.glb" 
-        alt="3D画框"
-        camera-controls 
-        auto-rotate
-        shadow-intensity="1"
-        exposure="1"
-        style="width:100%;height:100%;--poster-color: transparent;">
-      </model-viewer>
-    `;
-  } else {
-    content.innerHTML = `
-      <model-viewer 
-        src="${src}" 
-        alt="3D模型"
-        camera-controls 
-        auto-rotate
-        shadow-intensity="1"
-        exposure="1"
-        style="width:100%;height:100%;--poster-color: transparent;">
-      </model-viewer>
-    `;
-  }
-  
-  modal.classList.add('active');
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('active');
-}
-
-updateUI();
+  updateUI();
 }
 
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); } if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'Escape') closeModal();
 });
 
 // Touch / swipe
@@ -748,13 +676,13 @@ document.addEventListener('touchend', (e) => {
 function openModal(src, type) {
   const modal = document.getElementById('modal');
   const content = document.getElementById('modalContent');
-  
+
   if (type === 'image') {
     content.innerHTML = `
-      <model-viewer 
-        src="../../assets/models/picture_frame.glb" 
+      <model-viewer
+        src="../../assets/models/picture_frame.glb"
         alt="3D画框"
-        camera-controls 
+        camera-controls
         auto-rotate
         shadow-intensity="1"
         exposure="1"
@@ -763,10 +691,10 @@ function openModal(src, type) {
     `;
   } else {
     content.innerHTML = `
-      <model-viewer 
-        src="${src}" 
+      <model-viewer
+        src="${src}"
         alt="3D模型"
-        camera-controls 
+        camera-controls
         auto-rotate
         shadow-intensity="1"
         exposure="1"
@@ -774,7 +702,7 @@ function openModal(src, type) {
       </model-viewer>
     `;
   }
-  
+
   modal.classList.add('active');
 }
 

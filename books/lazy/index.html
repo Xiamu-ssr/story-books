@@ -42,20 +42,23 @@ html, body {
   display: flex;
   overflow: hidden;
   opacity: 0;
-  transform: translateX(60px) scale(0.95);
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: translateX(100px) rotateY(8deg) scale(0.92);
+  transform-origin: left center;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   pointer-events: none;
+  backface-visibility: hidden;
 }
 
 .page.active {
   opacity: 1;
-  transform: translateX(0) scale(1);
+  transform: translateX(0) rotateY(0) scale(1);
   pointer-events: auto;
 }
 
 .page.prev {
   opacity: 0;
-  transform: translateX(-60px) scale(0.95);
+  transform: translateX(-100px) rotateY(-8deg) scale(0.92);
+  transform-origin: right center;
 }
 
 .page-content {
@@ -410,7 +413,7 @@ html, body {
     <div class="page-content">
       <div class="cover-title">偷懒改变世界</div>
       <div class="cover-subtitle">那些"懒人"发明的伟大东西</div>
-      <div class="cover-meta">讲给点点的 10 个故事</div>
+      <div class="cover-meta">讲给点点的 5 个故事</div>
     </div>
     <div class="page-media full" style="position:absolute;inset:0;opacity:0.3;">
       <img src="images/01_cover.png" alt="偷懒改变世界" style="object-fit:cover;">
@@ -440,31 +443,8 @@ html, body {
     </div>
   </div>
 
-  <!-- Page 2: Dishwasher 1886 -->
+  <!-- Page 2: Assembly Line 1913 -->
   <div class="page" data-page="2">
-    <div class="page-content">
-      <div class="page-title">1886年，贵妇不想洗碗</div>
-      <div class="page-subtitle">约瑟芬·科克伦 · 洗碗机之母</div>
-      <div class="page-body">
-        <p>约瑟芬·科克伦是美国富家太太，家里开派对用名贵瓷器，但仆人总把碗洗出缺口。她心疼，但<span class="highlight">更不想自己洗</span>。</p>
-        <p>她说："如果没人能造出洗碗的机器，那我就自己造。"</p>
-        <p>她在后院小棚子里用铁丝做碗架、铜管喷水、马达转动，造出<span class="highlight">世界第一台实用洗碗机</span>。1886年拿到专利，后来公司变成惠而浦。</p>
-        <div class="key-takeaway">
-          <strong>偷懒逻辑：</strong>不想洗碗 → 发明洗碗机 → 每天省半小时，一年省180小时。
-        </div>
-      </div>
-      <div class="page-num">贰</div>
-    </div>
-    <div class="page-media">
-      <div class="media-item" onclick="openModal('images/03_dishwasher.png', 'image')">
-        <img src="images/03_dishwasher.png" alt="洗碗机">
-        <div class="media-label">点击放大</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Page 3: Assembly Line 1913 -->
-  <div class="page" data-page="3">
     <div class="page-content">
       <div class="page-title">1913年，福特让汽车"流"起来</div>
       <div class="page-subtitle">流水线 · 工人不动，车动</div>
@@ -476,7 +456,7 @@ html, body {
           <strong>偷懒逻辑：</strong>不想走来走去 → 发明流水线 → 效率提升8倍。
         </div>
       </div>
-      <div class="page-num">叁</div>
+      <div class="page-num">贰</div>
     </div>
     <div class="page-media">
       <div class="media-item" onclick="openModal('images/04_assembly.png', 'image')">
@@ -486,31 +466,8 @@ html, body {
     </div>
   </div>
 
-  <!-- Page 4: Microwave 1945 -->
-  <div class="page" data-page="4">
-    <div class="page-content">
-      <div class="page-title">1945年，口袋里的巧克力化了</div>
-      <div class="page-subtitle">微波炉 · 雷达工程师的意外</div>
-      <div class="page-body">
-        <p>1945年，工程师斯宾塞测试雷达设备时，发现口袋里的<span class="highlight">巧克力棒化了</span>。</p>
-        <p>一般人骂句"倒霉"就完了。但他好奇：雷达波能加热食物？他抓把玉米粒放机器前——<span class="highlight">爆米花蹦出来了</span>。</p>
-        <p>1947年第一台微波炉诞生，热饭从"生火等10分钟"变成"叮，30秒"。</p>
-        <div class="key-takeaway">
-          <strong>偷懒逻辑：</strong>不想等热饭 → 微波炉30秒搞定。意外+好奇心=发明。
-        </div>
-      </div>
-      <div class="page-num">肆</div>
-    </div>
-    <div class="page-media">
-      <div class="media-item" onclick="openModal('images/05_microwave.png', 'image')">
-        <img src="images/05_microwave.png" alt="微波炉">
-        <div class="media-label">点击放大</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Page 5: Remote Control 1955 -->
-  <div class="page" data-page="5">
+  <!-- Page 3: Remote Control 1955 -->
+  <div class="page" data-page="3">
     <div class="page-content">
       <div class="page-title">1955年，他不想站起来换台</div>
       <div class="page-subtitle">电视遥控器 · 沙发土豆的救星</div>
@@ -522,7 +479,7 @@ html, body {
           <strong>偷懒逻辑：</strong>不想站起来 → 遥控器 → 人类从此"葛优躺"控制世界。
         </div>
       </div>
-      <div class="page-num">伍</div>
+      <div class="page-num">叁</div>
     </div>
     <div class="page-media">
       <div class="media-item" onclick="openModal('images/06_remote.png', 'image')">
@@ -537,8 +494,8 @@ html, body {
     </div>
   </div>
 
-  <!-- Page 6: Container 1956 -->
-  <div class="page" data-page="6">
+  <!-- Page 4: Container 1956 -->
+  <div class="page" data-page="4">
     <div class="page-content">
       <div class="page-title">1956年，码头工人失业了</div>
       <div class="page-subtitle">集装箱 · 一个铁箱子改变世界贸易</div>
@@ -550,7 +507,7 @@ html, body {
           <strong>偷懒逻辑：</strong>不想一件件搬 → 集装箱 → 全球贸易成本暴跌。
         </div>
       </div>
-      <div class="page-num">陆</div>
+      <div class="page-num">肆</div>
     </div>
     <div class="page-media">
       <div class="media-item" onclick="openModal('images/07_container.png', 'image')">
@@ -560,77 +517,8 @@ html, body {
     </div>
   </div>
 
-  <!-- Page 7: Instant Noodles 1958 -->
-  <div class="page" data-page="7">
-    <div class="page-content">
-      <div class="page-title">1958年，他在后院炸面条</div>
-      <div class="page-subtitle">安藤百福 · 方便面之父</div>
-      <div class="page-body">
-        <p>1958年，48岁的安藤百福在自家后院搭棚子捣鼓面条。目标：让普通人<span class="highlight">在家3分钟吃上热汤面</span>。</p>
-        <p>试了一年多，直到看到妻子炸天妇罗才开窍：<span class="highlight">油炸可以脱水</span>！面条先蒸熟再油炸，开水一泡就软。世界第一包方便面诞生。</p>
-        <p>今天全球每年吃掉 <span class="number">1000多亿</span> 包。安藤活到96岁，说长寿秘诀就是每天吃方便面。</p>
-        <div class="key-takeaway">
-          <strong>偷懒逻辑：</strong>不想排队等拉面 → 方便面 → 3分钟解决一顿饭。
-        </div>
-      </div>
-      <div class="page-num">柒</div>
-    </div>
-    <div class="page-media">
-      <div class="media-item" onclick="openModal('images/08_noodles.png', 'image')">
-        <img src="images/08_noodles.png" alt="方便面">
-        <div class="media-label">点击放大</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Page 8: Copy-Paste 1973 -->
-  <div class="page" data-page="8">
-    <div class="page-content">
-      <div class="page-title">1973年，他懒得重打一遍</div>
-      <div class="page-subtitle">复制粘贴 · 程序员的终极偷懒</div>
-      <div class="page-body">
-        <p>1970年代，程序员特斯勒写代码时经常要把一段文字挪来挪去。当时的做法：删掉，重新打一遍。他烦透了：<span class="highlight">为什么要重打？</span></p>
-        <p>他发明了"剪切-复制-粘贴"。选中，按键，文字就"飞"到另一个地方。后来带到苹果，再传到Windows。今天 Ctrl+C / Ctrl+V 可能是全球使用频率最高的快捷键。</p>
-        <p>他2020年去世，推特简介写着："复制粘贴的发明者。不用谢。"</p>
-        <div class="key-takeaway">
-          <strong>偷懒逻辑：</strong>不想重打 → 复制粘贴 → 全人类每天省无数小时。
-        </div>
-      </div>
-      <div class="page-num">捌</div>
-    </div>
-    <div class="page-media">
-      <div class="media-item" onclick="openModal('images/09_copypaste.png', 'image')">
-        <img src="images/09_copypaste.png" alt="复制粘贴">
-        <div class="media-label">点击放大</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Page 9: QR Code 1994 -->
-  <div class="page" data-page="9">
-    <div class="page-content">
-      <div class="page-title">1994年，围棋给了他灵感</div>
-      <div class="page-subtitle">二维码 · 从工厂零件到移动支付</div>
-      <div class="page-body">
-        <p>1994年，日本工程师原昌宏要追踪汽车零件，但条形码只能存20个字符，<span class="highlight">信息太少扫得还慢</span>。</p>
-        <p>午休下围棋时，他看着黑白棋子在格子上的布局，灵光一闪：<span class="highlight">就用方格图案</span>！二维码诞生，能存几千字符，扫起来快10倍。</p>
-        <p>他放弃专利让二维码免费。20多年后，中国人把它玩出了花——移动支付、健康码、点餐码……今天中国每天扫码 <span class="number">几十亿</span> 次。</p>
-        <div class="key-takeaway">
-          <strong>偷懒逻辑：</strong>不想慢慢扫条形码 → 二维码 → 手机一扫全搞定。
-        </div>
-      </div>
-      <div class="page-num">玖</div>
-    </div>
-    <div class="page-media">
-      <div class="media-item" onclick="openModal('images/10_qrcode.png', 'image')">
-        <img src="images/10_qrcode.png" alt="二维码">
-        <div class="media-label">点击放大</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Page 10: Conclusion -->
-  <div class="page" data-page="10">
+  <!-- Page 5: Conclusion -->
+  <div class="page" data-page="5">
     <div class="page-content">
       <div class="page-title">偷懒的正确姿势</div>
       <div class="page-subtitle">懒不是罪，瞎忙才是</div>
@@ -645,7 +533,7 @@ html, body {
           <strong>终极问题：</strong>你现在每天重复做的哪件事，其实可以"偷懒"解决？
         </div>
       </div>
-      <div class="page-num">拾</div>
+      <div class="page-num">伍</div>
     </div>
     <div class="page-media">
       <div class="media-item" onclick="openModal('images/12_ending.png', 'image')">
@@ -660,7 +548,7 @@ html, body {
 <!-- Navigation -->
 <div class="nav">
   <button id="prevBtn" onclick="changePage(-1)">‹</button>
-  <span class="page-indicator" id="indicator">1 / 11</span>
+  <span class="page-indicator" id="indicator">1 / 6</span>
   <button id="nextBtn" onclick="changePage(1)">›</button>
 </div>
 
@@ -676,7 +564,7 @@ html, body {
 
 <script>
 let currentPage = 0;
-const totalPages = 11;
+const totalPages = 6;
 const pages = document.querySelectorAll('.page');
 
 const dotsContainer = document.getElementById('dots');
@@ -733,43 +621,25 @@ document.addEventListener('touchend', (e) => {
 function openModal(src, type) {
   const modal = document.getElementById('modal');
   const content = document.getElementById('modalContent');
-  
+
   if (type === 'image') {
-    // 图片用3D画框展示
     content.innerHTML = `
-      <model-viewer 
-        src="../../assets/models/picture_frame.glb" 
+      <model-viewer
+        src="../../assets/models/picture_frame.glb"
         alt="3D画框"
-        camera-controls 
+        camera-controls
         auto-rotate
         shadow-intensity="1"
         exposure="1"
         style="width:100%;height:100%;--poster-color: transparent;">
       </model-viewer>
     `;
-    // 动态替换画框纹理
-    setTimeout(() => {
-      const mv = content.querySelector('model-viewer');
-      if (mv && mv.model) {
-        // 创建纹理并应用到画框
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          const texture = new THREE.Texture();
-          texture.image = img;
-          texture.needsUpdate = true;
-          // 这里简化处理，实际应该替换材质
-        };
-        img.src = src;
-      }
-    }, 500);
   } else {
-    // 3D模型直接展示
     content.innerHTML = `
-      <model-viewer 
-        src="${src}" 
+      <model-viewer
+        src="${src}"
         alt="3D模型"
-        camera-controls 
+        camera-controls
         auto-rotate
         shadow-intensity="1"
         exposure="1"
@@ -777,7 +647,7 @@ function openModal(src, type) {
       </model-viewer>
     `;
   }
-  
+
   modal.classList.add('active');
 }
 
