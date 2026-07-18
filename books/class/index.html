@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阶级的秘密 · 点点的书架</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3/dist/model-viewer.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1410;
+  --bg-page: #faf6ee;
+  --accent-gold: #c9a84c;
+  --accent-red: #b8423a;
+  --text-dark: #2c2418;
+  --text-light: #6b5d4f;
+  --shadow: rgba(0,0,0,0.15);
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg-dark);
+}
+
+#book {
+  width: 100vw; height: 100vh;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.page {
+  position: absolute;
+  width: 94%; max-width: 1100px;
+  height: 88%; max-height: 800px;
+  background: var(--bg-page);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
+  display: flex;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(100px) rotateY(8deg) scale(0.92);
+  transform-origin: left center;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateX(0) rotateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.page.prev {
+  opacity: 0;
+  transform: translateX(-100px) rotateY(-8deg) scale(0.92);
+  transform-origin: right center;
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 50px;
+  overflow-y: auto;
+}
+
+.page-media {
+  width: 45%;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(201,168,76,0.2);
+  background: #f0e9dc;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.page-media model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.media-item {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.media-item:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.media-item model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+.media-label {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  pointer-events: none;
+  background: rgba(250,246,238,0.8);
+  padding: 4px 8px;
+}
+
+.media-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  flex-shrink: 0;
+}
+
+.page-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.page-media.full {
+  width: 100%;
+  height: 100%;
+  border-left: none;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 20px; right: 30px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+}
+
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.page-body {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.page-body p {
+  margin-bottom: 14px;
+}
+
+.page-body .highlight {
+  background: linear-gradient(transparent 60%, rgba(201,168,76,0.25) 60%);
+  font-weight: 500;
+}
+
+.page-body .number {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+  color: var(--accent-red);
+}
+
+.page-body .quote {
+  border-left: 3px solid var(--accent-gold);
+  padding-left: 14px;
+  margin: 16px 0;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.key-takeaway {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-gold);
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.key-takeaway strong {
+  color: var(--accent-red);
+}
+
+/* Cover page special style */
+.page.cover {
+  background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
+}
+
+.page.cover .page-content {
+  color: #e8dcc8;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
+}
+
+.page.cover .cover-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 20px rgba(201,168,76,0.3);
+}
+
+.page.cover .cover-subtitle {
+  font-size: 18px;
+  color: #a89878;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+.page.cover .cover-meta {
+  font-size: 13px;
+  color: #6b5d4f;
+  margin-top: 40px;
+  letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 100;
+  background: rgba(26,20,16,0.85);
+  padding: 10px 20px;
+  border-radius: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.nav button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.nav button:hover {
+  background: #e0c060;
+  transform: scale(1.1);
+}
+
+.nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav .page-indicator {
+  color: #e8dcc8;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Home link */
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: rgba(232,220,200,0.6);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(26,20,16,0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+
+.home-link:hover {
+  color: var(--accent-gold);
+  background: rgba(26,20,16,0.85);
+}
+
+/* Progress dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  background: var(--accent-gold);
+  transform: scale(1.4);
+}
+
+/* Scrollbar */
+.page-content::-webkit-scrollbar { width: 5px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page { flex-direction: column; height: 90%; width: 94%; }
+  .page-media { width: 100%; height: 40%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: row; } .media-item { flex: 1; } .media-divider { width: 1px; height: auto; }
+  .page-content { padding: 24px 28px; }
+  .page-title { font-size: 22px; }
+  .page-body { font-size: 14px; line-height: 1.8; }
+  .page.cover .cover-title { font-size: 32px; }
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,16,0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-close:hover {
+  transform: scale(1.1);
+}
+
+.modal-content {
+  width: 90%;
+  height: 90%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content model-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(232,220,200,0.6);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
+
+<div id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="阶级的秘密">
+    </div>
+    <div class="page-content">
+      <div class="cover-title">阶级的秘密</div>
+      <div class="cover-subtitle">谁干活，谁拿钱，谁定规则，谁兜底</div>
+      <div class="cover-meta">讲给点点的 18 个故事</div>
+    </div>
+  </div>
+
+  <!-- Page 1: 公元前10000年，最后一只野牛 -->
+  <div class="page" data-page="1">
+    <div class="page-content">
+      <div class="page-title">公元前10000年，最后一只野牛</div>
+      <div class="page-subtitle">没有剩余，就没有阶级</div>
+      <div class="page-body">
+        <p>一万多年前，你的祖先靠打猎和摘果子活着。</p>
+        <p>那时候没有富人，也没有穷人。为什么？因为<span class='highlight'>食物存不下来</span>。今天打到一头野牛，全村今晚就吃光，放三天就臭了。</p>
+        <p>没有东西可以'存起来慢慢用'，就没有人能比别人多占。大家一样饿，一样饱。</p>
+        <p>所以记住第一句话：<span class='highlight'>不平等，是从'有东西可以剩下'才开始的。</span></p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>阶级的第一课：不平等的前提，是先有'剩余'。没有剩余，连'你的''我的'都不存在。
+        </div>
+      </div>
+      <div class="page-num">壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/02_buffalo.png', 'image')">
+        <img src="images/02_buffalo.png" alt="公元前10000年，最后一只野牛">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/bison.glb', 'model')">
+        <model-viewer src="../../assets/models/bison.glb" alt="野牛" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: 公元前8000年，第一粒被存起来的麦子 -->
+  <div class="page" data-page="2">
+    <div class="page-content">
+      <div class="page-title">公元前8000年，第一粒被存起来的麦子</div>
+      <div class="page-subtitle">剩余需要分配，分配产生权力</div>
+      <div class="page-body">
+        <p>后来人们学会了种小麦。粮食可以晒干、存进仓库，放一年都不坏。</p>
+        <p>这下，第一次有了'吃不完的东西'。</p>
+        <p>可是粮食多了，就得有人<span class='highlight'>看守仓库、记账、决定分给谁</span>。谁来干？祭司和士兵。他们不用种地，却决定别人能分多少。</p>
+        <p>你看，<span class='highlight'>管仓库的人，慢慢就变成了'官'</span>。权力，是从'分配剩余'里长出来的。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>阶级的第二课：一旦出现剩余，就需要人分配。掌握分配权的人，成了最早的上层。
+        </div>
+      </div>
+      <div class="page-num">贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/03_wheat.png', 'image')">
+        <img src="images/03_wheat.png" alt="公元前8000年，第一粒被存起来的麦子">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/granary.glb', 'model')">
+        <model-viewer src="../../assets/models/granary.glb" alt="粮仓" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: 公元前3000年，神庙里的第一所学校 -->
+  <div class="page" data-page="3">
+    <div class="page-content">
+      <div class="page-title">公元前3000年，神庙里的第一所学校</div>
+      <div class="page-subtitle">文字，是阶级的门票</div>
+      <div class="page-body">
+        <p>在苏美尔（今天的伊拉克），有全世界最早的学校，叫'埃杜巴'。</p>
+        <p>它教什么？教一种叫<span class='highlight'>楔形文字</span>的东西——用小木棍在泥板上刻字，记下谁交了多少粮、谁欠了多少债。</p>
+        <p>会写字的人太少了，所以他们成了<span class='highlight'>最吃香的人</span>：记账、收税、立法，全离不开他们。</p>
+        <p>从第一天起，<span class='highlight'>读书识字，就是通往上层的门票</span>。这张门票，今天还在用。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>阶级的第三课：教育从诞生那天起，就是阶级的门票。会写字的人管着不识字的人。
+        </div>
+      </div>
+      <div class="page-num">叁</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/04_school.png', 'image')">
+        <img src="images/04_school.png" alt="公元前3000年，神庙里的第一所学校">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/clay_tablet.glb', 'model')">
+        <model-viewer src="../../assets/models/clay_tablet.glb" alt="泥板" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: 公元605年，一张桌子改变血统 -->
+  <div class="page" data-page="4">
+    <div class="page-content">
+      <div class="page-title">公元605年，一张桌子改变血统</div>
+      <div class="page-subtitle">科举：读书改命的默认程序</div>
+      <div class="page-body">
+        <p>在中国，过去想当官，靠的是出身——爸爸是贵族，你才是。</p>
+        <p>公元605年，隋炀帝搞了个新发明：<span class='highlight'>科举</span>。不管你是放牛娃还是富家子，只要考试考得好，就能做官。</p>
+        <p>这是人类历史上第一次，<span class='highlight'>普通人有了一条凭本事往上爬的正规通道</span>。</p>
+        <p>从那以后，'读书改变命运'刻进了中国人的骨头里。你现在每天坐的课桌，就是那条通道的延续。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>阶级的第四课：分化永远存在，但'流动性'可以人为造出来。科举就是一台造了1300年的梯子。
+        </div>
+      </div>
+      <div class="page-num">肆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/05_keju.png', 'image')">
+        <img src="images/05_keju.png" alt="公元605年，一张桌子改变血统">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/exam_desk.glb', 'model')">
+        <model-viewer src="../../assets/models/exam_desk.glb" alt="科举考桌" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: 1958年，粮票与户口 -->
+  <div class="page" data-page="5">
+    <div class="page-content">
+      <div class="page-title">1958年，粮票与户口</div>
+      <div class="page-subtitle">国家直接分配一切</div>
+      <div class="page-body">
+        <p>快进到1958年的中国。那时候，钱不是最重要的，<span class='highlight'>票</span>才是。</p>
+        <p>买米要粮票，买布要布票，买肉要肉票。没有票，有钱也买不到。</p>
+        <p>还有一个更厉害的，叫<span class='highlight'>户口</span>：它写明了你是'城里人'还是'乡下人'，很大程度上决定了你能去哪、能干什么。</p>
+        <p>这是一个<span class='highlight'>国家把几乎所有东西都统一分配</span>的年代。你的爷爷辈，就是在这样的世界里长大的。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>阶级的第五课：当国家直接分配一切，你的身份（户口、单位）就是你的命运。
+        </div>
+      </div>
+      <div class="page-num">伍</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/06_liangpiao.png', 'image')">
+        <img src="images/06_liangpiao.png" alt="1958年，粮票与户口">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/ration_coupon.glb', 'model')">
+        <model-viewer src="../../assets/models/ration_coupon.glb" alt="粮票" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: 1978年冬天，570万人的准考证 -->
+  <div class="page" data-page="6">
+    <div class="page-content">
+      <div class="page-title">1978年冬天，570万人的准考证</div>
+      <div class="page-subtitle">窗口重新打开</div>
+      <div class="page-body">
+        <p>有一段时间，高考停了11年。能不能上大学，看推荐、看出身，不看分数。</p>
+        <p>1978年，国家决定：<span class='highlight'>恢复高考</span>。不管你是农民还是工人，凭分数说话。</p>
+        <p>那一年冬天，<span class='number'>570万</span>人涌进考场，很多人是从田里、从工厂直接赶来的，手上还有老茧。最后录取了27万。</p>
+        <p>他们中间，就有后来的俞敏洪、刘强东。<span class='highlight'>一道关了11年的门，突然打开了——只是它只开给手里有准备的人。</span></p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>阶级的第六课：窗口打开时，手里得有牌。学习和本事，就是你攥在手里的牌。
+        </div>
+      </div>
+      <div class="page-num">陆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/07_gaokao.png', 'image')">
+        <img src="images/07_gaokao.png" alt="1978年冬天，570万人的准考证">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/admission_ticket.glb', 'model')">
+        <model-viewer src="../../assets/models/admission_ticket.glb" alt="准考证" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: 1949-1980，中国：只有一个游戏可以玩 -->
+  <div class="page" data-page="7">
+    <div class="page-content">
+      <div class="page-title">1949-1980，中国：只有一个游戏可以玩</div>
+      <div class="page-subtitle">单轨制的逻辑</div>
+      <div class="page-body">
+        <p>咱们先聊第一种玩法。想象全班只有一个游戏，所有人必须玩同一个。</p>
+        <p>规则很清楚、入口只有一个、路只有一条。好处是：<span class='highlight'>心特别齐，能办大事</span>。</p>
+        <p>但有个风险：万一这条轨道本身出了问题，<span class='highlight'>没人敢修</span>——因为所有人都在轨道上，谁动轨道谁就是和大家作对。</p>
+        <p>这就是'单轨制'：要么一起走对，要么一起走错。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>单轨制：规则清晰、执行力强，但最怕轨道本身出错——因为没人敢修。
+        </div>
+      </div>
+      <div class="page-num">柒</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/08_single_track.png', 'image')">
+        <img src="images/08_single_track.png" alt="1949-1980，中国：只有一个游戏可以玩">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/single_track.glb', 'model')">
+        <model-viewer src="../../assets/models/single_track.glb" alt="单轨" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: 美国：让你觉得你可以赢 -->
+  <div class="page" data-page="8">
+    <div class="page-content">
+      <div class="page-title">美国：让你觉得你可以赢</div>
+      <div class="page-subtitle">多轨制的逻辑</div>
+      <div class="page-body">
+        <p>第二种玩法相反：班里有好多游戏，篮球、画画、编程……每个人都能挑。</p>
+        <p>这叫'多轨制'。它给你一个特别重要的东西——<span class='highlight'>希望</span>。'美国梦'就是说：只要努力，你就能赢。</p>
+        <p>但仔细看：很多游戏其实是<span class='highlight'>买彩票</span>，中奖的极少；真正定输赢的牌桌，早就坐满了人。</p>
+        <p>它让你'觉得'你能赢。希望和真的机会，是两回事。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>多轨制：用'希望'维持稳定。但要分清——你是在真牌桌上玩，还是在买彩票。
+        </div>
+      </div>
+      <div class="page-num">捌</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/09_multi_track.png', 'image')">
+        <img src="images/09_multi_track.png" alt="美国：让你觉得你可以赢">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/lottery_wheel.glb', 'model')">
+        <model-viewer src="../../assets/models/lottery_wheel.glb" alt="彩票转盘" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 9: 1991年，苏联：游戏结束，没人会修 -->
+  <div class="page" data-page="9">
+    <div class="page-content">
+      <div class="page-title">1991年，苏联：游戏结束，没人会修</div>
+      <div class="page-subtitle">单轨制走到极端</div>
+      <div class="page-body">
+        <p>苏联把'只有一个游戏'推到了头：几乎所有工厂、商店、土地，都归国家管。</p>
+        <p>刚开始很猛，后来出问题了：商店里<span class='highlight'>货架空空</span>，人们排队几个小时买不到面包。</p>
+        <p>最要命的是，大家知道有问题，<span class='highlight'>却没人有能力、也没人有胆量去修这条唯一的轨道</span>。</p>
+        <p>1991年，整个系统'哐当'一声垮了。教训是：只有一个游戏时，它一出错，就是所有人的灾难。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>单轨制走到极端：系统失去纠错能力，崩溃时没人能幸免。
+        </div>
+      </div>
+      <div class="page-num">玖</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/10_soviet.png', 'image')">
+        <img src="images/10_soviet.png" alt="1991年，苏联：游戏结束，没人会修">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/empty_shelf.glb', 'model')">
+        <model-viewer src="../../assets/models/empty_shelf.glb" alt="空货架" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 10: 2008年，华尔街：收割的高级形态 -->
+  <div class="page" data-page="10">
+    <div class="page-content">
+      <div class="page-title">2008年，华尔街：收割的高级形态</div>
+      <div class="page-subtitle">从收地租，到收利息</div>
+      <div class="page-body">
+        <p>古代的'收租'很直接：你种我的地，收成给我一半。</p>
+        <p>现代金融把这件事做得<span class='highlight'>看不见了</span>。它不抢你的粮食，它用'利息''债务''杠杆'，从你的账户数字里悄悄拿走。</p>
+        <p>2008年，这套玩法玩过头，全世界的金融系统差点崩了。可最后倒霉的，<span class='highlight'>不是玩杠杆的银行家，而是丢了房子、丢了工作的普通人</span>。</p>
+        <p>收割从来没停，只是工具越来越高级，越来越让你看不懂。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>现代收割：不用见面，用利息和债务完成。崩溃时，买单的往往是底层。
+        </div>
+      </div>
+      <div class="page-num">拾</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/11_wallstreet.png', 'image')">
+        <img src="images/11_wallstreet.png" alt="2008年，华尔街：收割的高级形态">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/coin_tower.glb', 'model')">
+        <model-viewer src="../../assets/models/coin_tower.glb" alt="硬币塔" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 11: 日本：一亿总中流的幻觉 -->
+  <div class="page" data-page="11">
+    <div class="page-content">
+      <div class="page-title">日本：一亿总中流的幻觉</div>
+      <div class="page-subtitle">年功序列与新种姓</div>
+      <div class="page-body">
+        <p>日本有个很美的说法，叫'一亿总中流'——意思是一亿日本人，全是中产，大家都差不多。</p>
+        <p>曾经，这几乎是真的。但经济泡沫破了以后，社会悄悄分成了两种人：</p>
+        <p>一种是<span class='highlight'>'正式员工'</span>，工作稳定、福利好；另一种是<span class='highlight'>'派遣员工'</span>，干一样的活，钱少一半，随时被辞退。</p>
+        <p>同样是上班，却像两个阶级。再平等的社会，也可能长出新的、看不见的墙。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>再平等的社会也会长出新墙：日本的新种姓，是'正式'与'派遣'之分。
+        </div>
+      </div>
+      <div class="page-num">拾壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/12_japan.png', 'image')">
+        <img src="images/12_japan.png" alt="日本：一亿总中流的幻觉">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/office_badge.glb', 'model')">
+        <model-viewer src="../../assets/models/office_badge.glb" alt="工牌" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 12: 平台：超越国界的收税人 -->
+  <div class="page" data-page="12">
+    <div class="page-content">
+      <div class="page-title">平台：超越国界的收税人</div>
+      <div class="page-subtitle">新地主不收地租</div>
+      <div class="page-body">
+        <p>以前的地主，收的是地租。今天出现了一种新'地主'：<span class='highlight'>平台</span>。</p>
+        <p>你刷视频、点外卖、打游戏、搜答案——背后都是平台。它不收你的地租，它收三样新税：</p>
+        <p><span class='highlight'>数据税</span>（你的一切行为它都记下）、<span class='highlight'>注意力税</span>（你的时间被它卖掉）、<span class='highlight'>撮合费</span>（每一笔交易它都抽成）。</p>
+        <p>最特别的是，这些新地主<span class='highlight'>不分国界</span>——它在中国收，也在美国收。这是人类历史上第一种跨国的收税人。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>新地主是平台：它超越国界，收的是数据、注意力和撮合费。
+        </div>
+      </div>
+      <div class="page-num">拾贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/13_platform.png', 'image')">
+        <img src="images/13_platform.png" alt="平台：超越国界的收税人">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/data_castle.glb', 'model')">
+        <model-viewer src="../../assets/models/data_castle.glb" alt="数据城堡" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 13: 古代农民：统计上的数字 -->
+  <div class="page" data-page="13">
+    <div class="page-content">
+      <div class="page-title">古代农民：统计上的数字</div>
+      <div class="page-subtitle">他们养活文明，却没有名字</div>
+      <div class="page-body">
+        <p>从苏美尔的麦田，到中国华北的平原，几千年里，人口最多的是同一种人：<span class='highlight'>农民</span>。</p>
+        <p>他们种出粮食，养活了祭司、士兵、工匠、商人——养活了整个文明。</p>
+        <p>可是翻遍史书，你找不到几个农民的名字。他们只出现在<span class='highlight'>税册</span>上，是一个数字，不是一个人。</p>
+        <p>他们生产剩余，却从不参与制定分配的规则。<span class='highlight'>文明靠他们运转，却不为他们书写。</span></p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>农民，是分配链条的最底端：负责提供剩余，但不参与制定规则。
+        </div>
+      </div>
+      <div class="page-num">拾叁</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/14_farmer_old.png', 'image')">
+        <img src="images/14_farmer_old.png" alt="古代农民：统计上的数字">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/wheat_farmer.glb', 'model')">
+        <model-viewer src="../../assets/models/wheat_farmer.glb" alt="麦田农民" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 14: 古代食利者：免税的2% -->
+  <div class="page" data-page="14">
+    <div class="page-content">
+      <div class="page-title">古代食利者：免税的2%</div>
+      <div class="page-subtitle">法国，1789年以前</div>
+      <div class="page-body">
+        <p>现在看对立面。1789年之前的法国，人分三个等级。</p>
+        <p>第一等级是教士，第二等级是贵族。他们加起来只占人口的<span class='number'>2%</span>，却占着大部分土地，<span class='highlight'>而且几乎不用交税</span>。</p>
+        <p>剩下的<span class='number'>98%</span>——农民、工匠、市民——辛苦干活，<span class='highlight'>却承担了几乎全部的税</span>。</p>
+        <p>一边越种地越穷，一边不种地反而免税。你说，这样的社会能长久吗？后来，法国大革命爆发了。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>古代食利者：2%的人免税，98%的人养他们。这就是法国大革命的真正导火索。
+        </div>
+      </div>
+      <div class="page-num">拾肆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/15_rentier_old.png', 'image')">
+        <img src="images/15_rentier_old.png" alt="古代食利者：免税的2%">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/noble_feast.glb', 'model')">
+        <model-viewer src="../../assets/models/noble_feast.glb" alt="贵族宴席" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 15: 现代农民工：流动的血 -->
+  <div class="page" data-page="15">
+    <div class="page-content">
+      <div class="page-title">现代农民工：流动的血</div>
+      <div class="page-subtitle">他们建了城市，城市不属于他们</div>
+      <div class="page-body">
+        <p>时间快进到今天的中国。农民换了个名字，叫<span class='highlight'>'农民工'</span>。</p>
+        <p>他们离开土地，进城建起了高楼大厦、修好了地铁、送出了每一份外卖。城市越变越漂亮。</p>
+        <p>可是，他们的户口还在农村。孩子想在城里上学，难；想在城里安家，更难。很多人干了一辈子，最后还是要<span class='highlight'>回到村里养老</span>。</p>
+        <p>他们建起了城市，<span class='highlight'>但城市的很多规则，不是为他们定的</span>。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>现代农民工：城市由他们建造，却不为他们设计。他们仍是最底层的供血者。
+        </div>
+      </div>
+      <div class="page-num">拾伍</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/16_farmer_new.png', 'image')">
+        <img src="images/16_farmer_new.png" alt="现代农民工：流动的血">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/hard_hat.glb', 'model')">
+        <model-viewer src="../../assets/models/hard_hat.glb" alt="安全帽" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 16: 现代食利者：钱生钱的世界 -->
+  <div class="page" data-page="16">
+    <div class="page-content">
+      <div class="page-title">现代食利者：钱生钱的世界</div>
+      <div class="page-subtitle">为什么睡觉的人比干活的人赚得多</div>
+      <div class="page-body">
+        <p>对立的另一边，也换了个样子。今天最厉害的'食利者'，不是贵族，是<span class='highlight'>钱本身</span>。</p>
+        <p>给你讲个真事。美国有个特别有钱的老人叫巴菲特。有一年他公开说：<span class='highlight'>'我交税的比例，比我的秘书还低。'</span></p>
+        <p>是不是很奇怪？其实是规则不一样：<span class='highlight'>秘书靠'干活'挣钱，税很重；巴菲特靠'钱生钱'，税很轻。</span></p>
+        <p>一个经济学家叫皮凯蒂，算了几百年的账，发现：<span class='highlight'>钱生钱的速度，一直比人干活挣钱快</span>。所以不干活的人，常常越睡越有钱。</p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>现代食利者：钱生钱比人挣钱快（r>g）。看懂这条，你就懂了为什么光靠'努力'追不上。
+        </div>
+      </div>
+      <div class="page-num">拾陆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/17_rentier_new.png', 'image')">
+        <img src="images/17_rentier_new.png" alt="现代食利者：钱生钱的世界">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/money_growth.glb', 'model')">
+        <model-viewer src="../../assets/models/money_growth.glb" alt="钱生钱" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 17: 写给点点：看懂规则的人 -->
+  <div class="page" data-page="17">
+    <div class="page-content">
+      <div class="page-title">写给点点：看懂规则的人</div>
+      <div class="page-subtitle">从泥板到你手里的屏幕</div>
+      <div class="page-body">
+        <p>点点，我们讲了一路，从一头野牛，讲到今天。其实只讲了一个问题：<span class='highlight'>谁干活、谁拿钱、谁定规则、谁兜底。</span></p>
+        <p>你会发现，没有哪种制度是完美的，它们只是用不同的方式回答这四个问题。</p>
+        <p>而且记住一件事：<span class='highlight'>每一次重新洗牌，都是因为有了新工具</span>。印刷机让知识不再被锁起来，互联网让开店不要门面。</p>
+        <p>今天你手里的这块屏幕，就是这个时代的新工具——它和当年的印刷机一样，是一次<span class='highlight'>重新排队的机会</span>。</p>
+        <p>区别只在于：有人用它打开世界，有人用它打发时间。<span class='highlight'>看清规则→练好本事→抓住窗口。这个选择，在你手里。</span></p>
+        <div class="key-takeaway">
+          <strong>阶级逻辑：</strong>全书落点：不平等或许永远在，但窗口也一直在。看懂规则、练好本事、抓住窗口——这是你能做的。
+        </div>
+      </div>
+      <div class="page-num">拾柒</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/18_dot.png', 'image')">
+        <img src="images/18_dot.png" alt="写给点点：看懂规则的人">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/tablet_spiral.glb', 'model')">
+        <model-viewer src="../../assets/models/tablet_spiral.glb" alt="屏幕与历史螺旋" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changePage(-1)">‹</button>
+  <span class="page-indicator" id="indicator">1 / 11</span>
+  <button id="nextBtn" onclick="changePage(1)">›</button>
+</div>
+
+<!-- Fullscreen Modal -->
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-hint">拖拽旋转 · 滚轮缩放 · 点击 × 关闭</div>
+</div>
+
+<!-- Progress dots -->
+<div class="dots" id="dots"></div>
+
+<script>
+let currentPage = 0;
+const totalPages = 18;
+const pages = document.querySelectorAll('.page');
+
+// Build dots
+const dotsContainer = document.getElementById('dots');
+for (let i = 0; i < totalPages; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToPage(i);
+  dotsContainer.appendChild(dot);
+}
+
+function updateUI() {
+  document.getElementById('indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+
+  pages.forEach((p, i) => {
+    p.classList.remove('active', 'prev');
+    if (i === currentPage) p.classList.add('active');
+    else if (i < currentPage) p.classList.add('prev');
+  });
+
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentPage);
+  });
+}
+
+function changePage(dir) {
+  const next = currentPage + dir;
+  if (next >= 0 && next < totalPages) {
+    currentPage = next;
+    updateUI();
+  }
+}
+
+function goToPage(i) {
+  currentPage = i;
+  updateUI();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'Escape') closeModal();
+});
+
+// Touch / swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
+});
+
+// Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  const hint = modal.querySelector('.modal-hint');
+
+  if (type === 'image') {
+    content.innerHTML = `<img src="${src}" alt="放大图片">`;
+    if (hint) hint.textContent = '点击 × 或按 ESC 关闭';
+  } else {
+    content.innerHTML = `
+      <model-viewer
+        src="${src}"
+        alt="3D模型"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1.3"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+    if (hint) hint.textContent = '拖拽旋转 · 滚轮缩放 · 点击 × 关闭';
+  }
+
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// 点击图片背景区域也可关闭
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal' || e.target.id === 'modalContent') closeModal();
+});
+
+updateUI();
+</script>
+</body>
+</html>
