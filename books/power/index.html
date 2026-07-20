@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>谁说了算 · 点点的书架</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3/dist/model-viewer.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1410;
+  --bg-page: #faf6ee;
+  --accent-gold: #c9a84c;
+  --accent-red: #b8423a;
+  --text-dark: #2c2418;
+  --text-light: #6b5d4f;
+  --shadow: rgba(0,0,0,0.15);
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg-dark);
+}
+
+#book {
+  width: 100vw; height: 100vh;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.page {
+  position: absolute;
+  width: 94%; max-width: 1100px;
+  height: 88%; max-height: 800px;
+  background: var(--bg-page);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
+  display: flex;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(100px) rotateY(8deg) scale(0.92);
+  transform-origin: left center;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateX(0) rotateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.page.prev {
+  opacity: 0;
+  transform: translateX(-100px) rotateY(-8deg) scale(0.92);
+  transform-origin: right center;
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 50px;
+  overflow-y: auto;
+}
+
+.page-media {
+  width: 45%;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(201,168,76,0.2);
+  background: #f0e9dc;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.page-media model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.media-item {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.media-item:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.media-item model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+.media-label {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  pointer-events: none;
+  background: rgba(250,246,238,0.8);
+  padding: 4px 8px;
+}
+
+.media-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  flex-shrink: 0;
+}
+
+.page-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.page-media.full {
+  width: 100%;
+  height: 100%;
+  border-left: none;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 20px; right: 30px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+}
+
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.page-body {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.page-body p {
+  margin-bottom: 14px;
+}
+
+.page-body .highlight {
+  background: linear-gradient(transparent 60%, rgba(201,168,76,0.25) 60%);
+  font-weight: 500;
+}
+
+.page-body .number {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+  color: var(--accent-red);
+}
+
+.page-body .quote {
+  border-left: 3px solid var(--accent-gold);
+  padding-left: 14px;
+  margin: 16px 0;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.key-takeaway {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-gold);
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.key-takeaway strong {
+  color: var(--accent-red);
+}
+
+/* Cover page special style */
+.page.cover {
+  background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
+}
+
+.page.cover .page-content {
+  color: #e8dcc8;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
+}
+
+.page.cover .cover-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 20px rgba(201,168,76,0.3);
+}
+
+.page.cover .cover-subtitle {
+  font-size: 18px;
+  color: #a89878;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+.page.cover .cover-meta {
+  font-size: 13px;
+  color: #6b5d4f;
+  margin-top: 40px;
+  letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 100;
+  background: rgba(26,20,16,0.85);
+  padding: 10px 20px;
+  border-radius: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.nav button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.nav button:hover {
+  background: #e0c060;
+  transform: scale(1.1);
+}
+
+.nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav .page-indicator {
+  color: #e8dcc8;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Home link */
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: rgba(232,220,200,0.6);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(26,20,16,0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+
+.home-link:hover {
+  color: var(--accent-gold);
+  background: rgba(26,20,16,0.85);
+}
+
+/* Progress dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  background: var(--accent-gold);
+  transform: scale(1.4);
+}
+
+/* Scrollbar */
+.page-content::-webkit-scrollbar { width: 5px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page { flex-direction: column; height: 90%; width: 94%; }
+  .page-media { width: 100%; height: 40%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: row; } .media-item { flex: 1; } .media-divider { width: 1px; height: auto; }
+  .page-content { padding: 24px 28px; }
+  .page-title { font-size: 22px; }
+  .page-body { font-size: 14px; line-height: 1.8; }
+  .page.cover .cover-title { font-size: 32px; }
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,16,0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-close:hover {
+  transform: scale(1.1);
+}
+
+.modal-content {
+  width: 90%;
+  height: 90%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content model-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(232,220,200,0.6);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
+
+<div id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="谁说了算">
+    </div>
+    <div class="page-content">
+      <div class="cover-title">谁说了算</div>
+      <div class="cover-subtitle">权力的游戏，从部落玩到选票</div>
+      <div class="cover-meta">讲给点点的 13 个故事</div>
+    </div>
+  </div>
+
+  <!-- Page 1: 远古部落，最强壮的人说了算 -->
+  <div class="page" data-page="1">
+    <div class="page-content">
+      <div class="page-title">远古部落，最强壮的人说了算</div>
+      <div class="page-subtitle">权力的第一种来源：拳头</div>
+      <div class="page-body">
+        <p>远古时代，一个部落谁说了算？多半是<span class='highlight'>最强壮、最会打猎的那个人</span>。</p>
+        <p>这很合理：猛兽来了他顶上去，食物不够他带队去找。大家服他，是因为他能保护大家。</p>
+        <p>这就是权力最原始的样子——<span class='highlight'>谁有能力带大家活下去，谁就说了算</span>。</p>
+        <p>可是，拳头有个大问题：它会老，会输。等他打不过更年轻的人，权力就得换人。靠拳头，权力永远坐不稳。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>权力最早靠能力（拳头）。但拳头会老，靠武力的权力坐不稳。
+        </div>
+      </div>
+      <div class="page-num">壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/02_strong.png', 'image')">
+        <img src="images/02_strong.png" alt="远古部落，最强壮的人说了算">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/spear.glb', 'model')">
+        <model-viewer src="../../assets/models/spear.glb" alt="长矛" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: 拳头让位给血统 -->
+  <div class="page" data-page="2">
+    <div class="page-content">
+      <div class="page-title">拳头让位给血统</div>
+      <div class="page-subtitle">世袭：爸爸的位置传给儿子</div>
+      <div class="page-body">
+        <p>后来，首领们想了个办法，让权力不用每次都重新打一架。</p>
+        <p>办法很简单：<span class='highlight'>我死后，位置传给我儿子，儿子再传给孙子。</span>这叫'世袭'。</p>
+        <p>从此，谁说了算，不再看谁最能干，而是看<span class='highlight'>谁是谁的儿子</span>。</p>
+        <p>好处是稳定，不用打了。坏处也明显：<span class='highlight'>万一接班的孩子没本事呢？</span>血统，把'能者居之'变成了'生得好就赢'。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>世袭让权力稳定传递，但也让'出身'取代了'能力'。生得好，比干得好更重要了。
+        </div>
+      </div>
+      <div class="page-num">贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/03_bloodline.png', 'image')">
+        <img src="images/03_bloodline.png" alt="拳头让位给血统">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/crown.glb', 'model')">
+        <model-viewer src="../../assets/models/crown.glb" alt="王冠" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: 公元前2000年，君权神授 -->
+  <div class="page" data-page="3">
+    <div class="page-content">
+      <div class="page-title">公元前2000年，君权神授</div>
+      <div class="page-subtitle">给权力编一个故事</div>
+      <div class="page-body">
+        <p>光靠血统，还是有人会不服：'凭什么你家世代当王？'</p>
+        <p>于是统治者讲了一个更厉害的故事：<span class='highlight'>'我的权力，是神给的。'</span></p>
+        <p>埃及法老说自己是太阳神的儿子，中国的皇帝自称'天子'——上天的儿子。你要反他，就是反天、反神。</p>
+        <p>这个故事太管用了。<span class='highlight'>只要大家信了，没人敢反抗。</span>权力第一次发现：比起拳头，<span class='highlight'>一个好故事，才是最省力的统治工具</span>。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>君权神授：权力靠'故事'来合理化。让被统治者相信，是最省力的统治。
+        </div>
+      </div>
+      <div class="page-num">叁</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/04_god.png', 'image')">
+        <img src="images/04_god.png" alt="公元前2000年，君权神授">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/sun_crown.glb', 'model')">
+        <model-viewer src="../../assets/models/sun_crown.glb" alt="神授王冠" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: 公元前221年，秦始皇 -->
+  <div class="page" data-page="4">
+    <div class="page-content">
+      <div class="page-title">公元前221年，秦始皇</div>
+      <div class="page-subtitle">一个人说了算的帝国</div>
+      <div class="page-body">
+        <p>在中国，秦始皇干了一件前所未有的事：把七个国家打成一个，<span class='highlight'>全天下的权力，攥在他一个人手里</span>。</p>
+        <p>他统一文字、统一度量衡、修长城、修驰道。一个人拍板，全国照办，效率高得惊人。</p>
+        <p>可问题是：<span class='highlight'>权力太集中，对错全看一个人。</span>他英明，天下受益；他犯浑，全国遭殃。</p>
+        <p>果然，他死后没几年，大秦就垮了。<span class='highlight'>一个人说了算，快是快，可一旦错了，没人拉得住。</span></p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>高度集权效率极高，但对错全系于一人。一个人说了算，最怕那个人犯错。
+        </div>
+      </div>
+      <div class="page-num">肆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/05_qin.png', 'image')">
+        <img src="images/05_qin.png" alt="公元前221年，秦始皇">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/empire_map.glb', 'model')">
+        <model-viewer src="../../assets/models/empire_map.glb" alt="帝国版图" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: 公元前500年，罗马元老院 -->
+  <div class="page" data-page="5">
+    <div class="page-content">
+      <div class="page-title">公元前500年，罗马元老院</div>
+      <div class="page-subtitle">一群老人，互相牵制</div>
+      <div class="page-body">
+        <p>差不多同一时期，罗马人走了另一条路。他们赶走了国王，说：<span class='highlight'>权力不能给一个人。</span></p>
+        <p>他们设了个'元老院'，由一群有经验的贵族老人<span class='highlight'>商量着来</span>，还设了两个'执政官'，互相牵制，谁也不能独断。</p>
+        <p>一个人犯错，还有人纠正。这让罗马强大了好几百年。</p>
+        <p>你看，这是和秦始皇完全相反的思路：<span class='highlight'>与其赌一个人永远英明，不如让权力互相盯着。</span></p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>罗马用分权代替集权：多人协商、互相牵制，避免把命运押在一个人身上。
+        </div>
+      </div>
+      <div class="page-num">伍</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/06_rome.png', 'image')">
+        <img src="images/06_rome.png" alt="公元前500年，罗马元老院">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/senate.glb', 'model')">
+        <model-viewer src="../../assets/models/senate.glb" alt="元老院" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: 1215年，大宪章 -->
+  <div class="page" data-page="6">
+    <div class="page-content">
+      <div class="page-title">1215年，大宪章</div>
+      <div class="page-subtitle">第一次给国王套上笼子</div>
+      <div class="page-body">
+        <p>国王权力再大，就没人管得了他吗？英国的贵族们不服。</p>
+        <p>1215年，他们逼着国王签下一份文件，叫<span class='highlight'>《大宪章》</span>。上面写着一句石破天惊的话：</p>
+        <p><span class='highlight'>国王，也要遵守法律。</span>不能想抓谁就抓谁，想收多少税就收多少税。</p>
+        <p>这是人类历史上第一次，<span class='highlight'>把最高的权力，也关进了'规则'的笼子里</span>。从此有了个新观念：不是你官大你就对，而是<span class='highlight'>规则比人更大</span>。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>大宪章的意义：连国王也要守法。权力第一次被'规则'约束，法治从此萌芽。
+        </div>
+      </div>
+      <div class="page-num">陆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/07_magna.png', 'image')">
+        <img src="images/07_magna.png" alt="1215年，大宪章">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/charter.glb', 'model')">
+        <model-viewer src="../../assets/models/charter.glb" alt="大宪章" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: 1789年，法国大革命 -->
+  <div class="page" data-page="7">
+    <div class="page-content">
+      <div class="page-title">1789年，法国大革命</div>
+      <div class="page-subtitle">权力还给人民？</div>
+      <div class="page-body">
+        <p>大宪章管住了国王一点，但老百姓还是没权。几百年后，法国人忍不了了。</p>
+        <p>还记得我们在《阶级的秘密》里讲的吗？教士和贵族只占2%，却免税；98%的人养活他们。</p>
+        <p>1789年，人民爆发了，喊出<span class='highlight'>'自由、平等、博爱'</span>，把国王送上了断头台。权力，第一次号称要还给'人民'。</p>
+        <p>可接下来的故事有点乱：革命之后是恐怖、是混战、最后又来了个皇帝拿破仑。<span class='highlight'>推翻旧权力容易，建好新权力，难得多。</span></p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>大革命想还权于民，但推翻旧权力容易，建立稳定的新权力难得多。
+        </div>
+      </div>
+      <div class="page-num">柒</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/08_revolution.png', 'image')">
+        <img src="images/08_revolution.png" alt="1789年，法国大革命">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/revolution.glb', 'model')">
+        <model-viewer src="../../assets/models/revolution.glb" alt="大革命" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: 选票：人人都有了权 -->
+  <div class="page" data-page="8">
+    <div class="page-content">
+      <div class="page-title">选票：人人都有了权</div>
+      <div class="page-subtitle">一人一票的力量与陷阱</div>
+      <div class="page-body">
+        <p>折腾了很久，人类慢慢找到一种办法：<span class='highlight'>一人一票，投票选说了算的人。</span></p>
+        <p>这个办法好在哪？权力来自大家的同意，选得不好，下次还能换掉。和平、有序。</p>
+        <p>但选票也有陷阱。有人靠<span class='highlight'>讲好听的话</span>骗票；有人许诺'<span class='highlight'>发福利</span>'拉票，其实是要拿你的钱买好；还有人多欺负人少。</p>
+        <p>所以投票不是万能的。它只是让人类的权力游戏，<span class='highlight'>从'动刀动枪'，变成了'动嘴动票'</span>——这已经是巨大的进步。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>选票让权力来自同意、可以和平更换。但要警惕：有人会用甜言蜜语和空头福利骗走你的票。
+        </div>
+      </div>
+      <div class="page-num">捌</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/09_vote.png', 'image')">
+        <img src="images/09_vote.png" alt="选票：人人都有了权">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/ballot_box.glb', 'model')">
+        <model-viewer src="../../assets/models/ballot_box.glb" alt="投票箱" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 9: 枪杆子、笔杆子、钱袋子 -->
+  <div class="page" data-page="9">
+    <div class="page-content">
+      <div class="page-title">枪杆子、笔杆子、钱袋子</div>
+      <div class="page-subtitle">权力背后的三根柱子</div>
+      <div class="page-body">
+        <p>说来说去，权力到底靠什么撑住？其实就三样东西。</p>
+        <p>第一是<span class='highlight'>枪杆子</span>：武力和军队，你不服就压你。这是最硬的。</p>
+        <p>第二是<span class='highlight'>笔杆子</span>：宣传和故事，让你从心里认同它。还记得'君权神授'吗？这是最巧的。</p>
+        <p>第三是<span class='highlight'>钱袋子</span>：掌握钱的分配，让跟着你的人有好处。这是最实的。</p>
+        <p>从古到今，不管叫什么名字的权力，扒开看，都离不开这三根柱子。<span class='highlight'>看懂了它们，你就看懂了权力的底牌。</span></p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>权力的三根支柱：武力（枪）、叙事（笔）、利益（钱）。看透这三样，就看透了权力。
+        </div>
+      </div>
+      <div class="page-num">玖</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/10_threes.png', 'image')">
+        <img src="images/10_threes.png" alt="枪杆子、笔杆子、钱袋子">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/three_pillars.glb', 'model')">
+        <model-viewer src="../../assets/models/three_pillars.glb" alt="三根柱子" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 10: 官僚与规则：看不见的实权 -->
+  <div class="page" data-page="10">
+    <div class="page-content">
+      <div class="page-title">官僚与规则：看不见的实权</div>
+      <div class="page-subtitle">真正办事的人，权力藏得最深</div>
+      <div class="page-body">
+        <p>还有一种权力，不在台前，藏在文件和公章后面——<span class='highlight'>官僚</span>。</p>
+        <p>国王、总统换来换去，但真正管事的，常常是那群<span class='highlight'>办手续、盖公章、执行规则的人</span>。</p>
+        <p>你想办个证、批个项目，快还是慢、批还是不批，往往他们一句话。他们官不大，<span class='highlight'>可实权不小</span>。</p>
+        <p>这种权力的好处是专业、稳定；坏处是容易<span class='highlight'>踢皮球、效率低、没人负责</span>。看不见的权力，同样需要被监督。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>官僚掌握'执行的实权'：不在台前却影响巨大。看不见的权力，更需要监督。
+        </div>
+      </div>
+      <div class="page-num">拾</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/11_bureau.png', 'image')">
+        <img src="images/11_bureau.png" alt="官僚与规则：看不见的实权">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/rubber_stamp.glb', 'model')">
+        <model-viewer src="../../assets/models/rubber_stamp.glb" alt="公章" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 11: 2026年：AI 开始替人做决定 -->
+  <div class="page" data-page="11">
+    <div class="page-content">
+      <div class="page-title">2026年：AI 开始替人做决定</div>
+      <div class="page-subtitle">算法，也是一种权力</div>
+      <div class="page-body">
+        <p>到了今天，权力又多了一种你想不到的样子——<span class='highlight'>算法</span>。</p>
+        <p>2026年，越来越多的事，不是人在做决定，而是AI：银行贷款批不批、简历先筛掉谁、你刷到什么视频、甚至路口红灯停几秒。</p>
+        <p>这些决定影响着你我，可它是怎么算的，<span class='highlight'>没人告诉你，你也问不着</span>。</p>
+        <p>这就提出了一个新问题：<span class='highlight'>当机器开始'说了算'，谁来管它？</span>它会不会偏心？犯了错找谁说理？这是你们这一代人，必须面对的新权力。</p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>2026的新权力是算法：它替人做决定却不解释。如何约束AI，是你们这代人的新课题。
+        </div>
+      </div>
+      <div class="page-num">拾壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/12_ai2026.png', 'image')">
+        <img src="images/12_ai2026.png" alt="2026年：AI 开始替人做决定">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/ai_brain.glb', 'model')">
+        <model-viewer src="../../assets/models/ai_brain.glb" alt="AI大脑" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 12: 写给点点：权力是责任 -->
+  <div class="page" data-page="12">
+    <div class="page-content">
+      <div class="page-title">写给点点：权力是责任</div>
+      <div class="page-subtitle">真正的好权力，是让人服，不是让人怕</div>
+      <div class="page-body">
+        <p>点点，讲了一路权力，从拳头到选票再到AI，你可能觉得权力很吓人。</p>
+        <p>其实权力本身没有好坏，<span class='highlight'>关键看它用来干什么、又被什么管着</span>。</p>
+        <p>靠拳头和吓唬的权力，让人怕，但坐不长；靠故事和福利的权力，让人跟，但可能骗；只有<span class='highlight'>靠本事、讲道理、接受监督的权力，才让人真心服</span>。</p>
+        <p>以后你也会有自己的'权力'：当班长、带团队、甚至只是影响身边的人。记住——</p>
+        <p><span class='highlight'>真正的权力，不是让多少人听你的，而是让多少人信你。权力越大，责任越大。</span></p>
+        <div class="key-takeaway">
+          <strong>权力的逻辑：</strong>全书落点：权力是用来担责任的，不是用来耍威风的。让人服的权力，才走得远。
+        </div>
+      </div>
+      <div class="page-num">拾贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/13_dot.png', 'image')">
+        <img src="images/13_dot.png" alt="写给点点：权力是责任">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/lantern_light.glb', 'model')">
+        <model-viewer src="../../assets/models/lantern_light.glb" alt="责任之灯" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changePage(-1)">‹</button>
+  <span class="page-indicator" id="indicator">1 / 13</span>
+  <button id="nextBtn" onclick="changePage(1)">›</button>
+</div>
+
+<!-- Fullscreen Modal -->
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-hint">拖拽旋转 · 滚轮缩放 · 点击 × 关闭</div>
+</div>
+
+<!-- Progress dots -->
+<div class="dots" id="dots"></div>
+
+<script>
+let currentPage = 0;
+const totalPages = 13;
+const pages = document.querySelectorAll('.page');
+
+// Build dots
+const dotsContainer = document.getElementById('dots');
+for (let i = 0; i < totalPages; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToPage(i);
+  dotsContainer.appendChild(dot);
+}
+
+function updateUI() {
+  document.getElementById('indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+
+  pages.forEach((p, i) => {
+    p.classList.remove('active', 'prev');
+    if (i === currentPage) p.classList.add('active');
+    else if (i < currentPage) p.classList.add('prev');
+  });
+
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentPage);
+  });
+}
+
+function changePage(dir) {
+  const next = currentPage + dir;
+  if (next >= 0 && next < totalPages) {
+    currentPage = next;
+    updateUI();
+  }
+}
+
+function goToPage(i) {
+  currentPage = i;
+  updateUI();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'Escape') closeModal();
+});
+
+// Touch / swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
+});
+
+// Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  const hint = modal.querySelector('.modal-hint');
+
+  if (type === 'image') {
+    content.innerHTML = `<img src="${src}" alt="放大图片">`;
+    if (hint) hint.textContent = '点击 × 或按 ESC 关闭';
+  } else {
+    content.innerHTML = `
+      <model-viewer
+        src="${src}"
+        alt="3D模型"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1.3"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+    if (hint) hint.textContent = '拖拽旋转 · 滚轮缩放 · 点击 × 关闭';
+  }
+
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// 点击图片背景区域也可关闭
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal' || e.target.id === 'modalContent') closeModal();
+});
+
+updateUI();
+</script>
+</body>
+</html>

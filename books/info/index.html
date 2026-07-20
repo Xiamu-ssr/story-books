@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>眼见为虚 · 点点的书架</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3/dist/model-viewer.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1410;
+  --bg-page: #faf6ee;
+  --accent-gold: #c9a84c;
+  --accent-red: #b8423a;
+  --text-dark: #2c2418;
+  --text-light: #6b5d4f;
+  --shadow: rgba(0,0,0,0.15);
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg-dark);
+}
+
+#book {
+  width: 100vw; height: 100vh;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.page {
+  position: absolute;
+  width: 94%; max-width: 1100px;
+  height: 88%; max-height: 800px;
+  background: var(--bg-page);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
+  display: flex;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(100px) rotateY(8deg) scale(0.92);
+  transform-origin: left center;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateX(0) rotateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.page.prev {
+  opacity: 0;
+  transform: translateX(-100px) rotateY(-8deg) scale(0.92);
+  transform-origin: right center;
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 50px;
+  overflow-y: auto;
+}
+
+.page-media {
+  width: 45%;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(201,168,76,0.2);
+  background: #f0e9dc;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.page-media model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.media-item {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.media-item:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.media-item model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+.media-label {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  pointer-events: none;
+  background: rgba(250,246,238,0.8);
+  padding: 4px 8px;
+}
+
+.media-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  flex-shrink: 0;
+}
+
+.page-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.page-media.full {
+  width: 100%;
+  height: 100%;
+  border-left: none;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 20px; right: 30px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+}
+
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.page-body {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.page-body p {
+  margin-bottom: 14px;
+}
+
+.page-body .highlight {
+  background: linear-gradient(transparent 60%, rgba(201,168,76,0.25) 60%);
+  font-weight: 500;
+}
+
+.page-body .number {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+  color: var(--accent-red);
+}
+
+.page-body .quote {
+  border-left: 3px solid var(--accent-gold);
+  padding-left: 14px;
+  margin: 16px 0;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.key-takeaway {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-gold);
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.key-takeaway strong {
+  color: var(--accent-red);
+}
+
+/* Cover page special style */
+.page.cover {
+  background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
+}
+
+.page.cover .page-content {
+  color: #e8dcc8;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
+}
+
+.page.cover .cover-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 20px rgba(201,168,76,0.3);
+}
+
+.page.cover .cover-subtitle {
+  font-size: 18px;
+  color: #a89878;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+.page.cover .cover-meta {
+  font-size: 13px;
+  color: #6b5d4f;
+  margin-top: 40px;
+  letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 100;
+  background: rgba(26,20,16,0.85);
+  padding: 10px 20px;
+  border-radius: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.nav button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.nav button:hover {
+  background: #e0c060;
+  transform: scale(1.1);
+}
+
+.nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav .page-indicator {
+  color: #e8dcc8;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Home link */
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: rgba(232,220,200,0.6);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(26,20,16,0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+
+.home-link:hover {
+  color: var(--accent-gold);
+  background: rgba(26,20,16,0.85);
+}
+
+/* Progress dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  background: var(--accent-gold);
+  transform: scale(1.4);
+}
+
+/* Scrollbar */
+.page-content::-webkit-scrollbar { width: 5px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page { flex-direction: column; height: 90%; width: 94%; }
+  .page-media { width: 100%; height: 40%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: row; } .media-item { flex: 1; } .media-divider { width: 1px; height: auto; }
+  .page-content { padding: 24px 28px; }
+  .page-title { font-size: 22px; }
+  .page-body { font-size: 14px; line-height: 1.8; }
+  .page.cover .cover-title { font-size: 32px; }
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,16,0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-close:hover {
+  transform: scale(1.1);
+}
+
+.modal-content {
+  width: 90%;
+  height: 90%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content model-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(232,220,200,0.6);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
+
+<div id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="眼见为虚">
+    </div>
+    <div class="page-content">
+      <div class="cover-title">眼见为虚</div>
+      <div class="cover-subtitle">你看到的，是谁想让你看到的</div>
+      <div class="cover-meta">讲给点点的 13 个故事</div>
+    </div>
+  </div>
+
+  <!-- Page 1: 公元前8世纪，烽火戏诸侯 -->
+  <div class="page" data-page="1">
+    <div class="page-content">
+      <div class="page-title">公元前8世纪，烽火戏诸侯</div>
+      <div class="page-subtitle">最早的'假消息'，亡了一个国</div>
+      <div class="page-body">
+        <p>西周的周幽王，为了逗宠妃褒姒笑，干了一件蠢事。</p>
+        <p>他点燃了<span class='highlight'>烽火</span>——那是边疆告急、喊诸侯带兵来救的信号，轻易不能点。</p>
+        <p>诸侯们火急火燎赶来，却发现根本没有敌人，只是博美人一笑。褒姒果然笑了，诸侯们的脸却黑了。</p>
+        <p>后来敌人真的来了，周幽王再点烽火——<span class='highlight'>没有一个人来救他。</span>西周就这么亡了。<span class='highlight'>假消息最毒的代价，是让真的也没人信了。</span></p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>最早的信息事故：烽火是假的，亡的是国。撒谎的代价，是让真话也没人信。
+        </div>
+      </div>
+      <div class="page-num">壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/02_beacon.png', 'image')">
+        <img src="images/02_beacon.png" alt="公元前8世纪，烽火戏诸侯">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/beacon_fire.glb', 'model')">
+        <model-viewer src="../../assets/models/beacon_fire.glb" alt="烽火台" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: 中世纪的抄经院 -->
+  <div class="page" data-page="2">
+    <div class="page-content">
+      <div class="page-title">中世纪的抄经院</div>
+      <div class="page-subtitle">知识被锁起来的年代</div>
+      <div class="page-body">
+        <p>在印刷术发明前，欧洲的书全靠人<span class='highlight'>用手一个字一个字抄</span>。</p>
+        <p>一本书要抄好几个月，贵得吓人，只有教会和贵族买得起。</p>
+        <p>谁掌握了抄书的权力，谁就掌握了'什么是知识'。普通人看不到书，<span class='highlight'>只能听教士说书里有</span>什么——他说什么，你就得信什么。</p>
+        <p>这是一种很隐蔽的权力：<span class='highlight'>控制了信息的入口，就控制了人的脑子。</span></p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>信息被垄断的年代：谁控制抄书，谁就控制知识。垄断信息入口，就是垄断思想。
+        </div>
+      </div>
+      <div class="page-num">贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/03_monk.png', 'image')">
+        <img src="images/03_monk.png" alt="中世纪的抄经院">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/manuscript.glb', 'model')">
+        <model-viewer src="../../assets/models/manuscript.glb" alt="手抄经卷" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: 1440年，古登堡的印刷机 -->
+  <div class="page" data-page="3">
+    <div class="page-content">
+      <div class="page-title">1440年，古登堡的印刷机</div>
+      <div class="page-subtitle">一台机器，炸开信息的墙</div>
+      <div class="page-body">
+        <p>1440年前后，德国人古登堡造出了<span class='highlight'>活字印刷机</span>。</p>
+        <p>以前抄一本书要几个月，现在一天能印几百本。书一下子便宜了，普通人也买得起了。</p>
+        <p>结果怎样？知识像决堤的水一样涌出来。马丁·路德写的批评教会的小册子，<span class='highlight'>两个星期传遍德国</span>——这在抄书时代想都不敢想。</p>
+        <p>教会对信息的垄断，被一台机器砸得粉碎。<span class='highlight'>每当信息变便宜，垄断者的墙就会塌。</span>这在《阶级的秘密》里我们也讲过。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>印刷机让信息变便宜，砸碎了垄断。技术每降低一次信息的成本，就解放一次思想。
+        </div>
+      </div>
+      <div class="page-num">叁</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/04_gutenberg.png', 'image')">
+        <img src="images/04_gutenberg.png" alt="1440年，古登堡的印刷机">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/printing_press.glb', 'model')">
+        <model-viewer src="../../assets/models/printing_press.glb" alt="印刷机" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: 1890年代，'黄色新闻' -->
+  <div class="page" data-page="4">
+    <div class="page-content">
+      <div class="page-title">1890年代，'黄色新闻'</div>
+      <div class="page-subtitle">标题党，一百年前就有了</div>
+      <div class="page-body">
+        <p>别以为标题党是网络时代的产物，一百多年前的美国报纸就玩得很溜了。</p>
+        <p>当时两家大报纸为了抢读者，比赛谁的标题<span class='highlight'>更夸张、更煽情、更吓人</span>。因为报上常印一个穿黄衣服的漫画小孩，被人叫'黄色新闻'。</p>
+        <p>它们甚至拼命渲染'西班牙威胁'，煽风点火，硬是<span class='highlight'>把美国舆论推向了战争</span>。</p>
+        <p>看出来了吗？<span class='highlight'>为了'点击量'（那时候叫销量），媒体可以牺牲真相。</span>这个毛病，到今天一点没改。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>黄色新闻=一百年前的标题党：为了销量牺牲真相，甚至能煽动战争。流量至上古已有之。
+        </div>
+      </div>
+      <div class="page-num">肆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/05_yellow.png', 'image')">
+        <img src="images/05_yellow.png" alt="1890年代，'黄色新闻'">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/newspaper.glb', 'model')">
+        <model-viewer src="../../assets/models/newspaper.glb" alt="黄色新闻报" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: 1930年代，无线电与宣传 -->
+  <div class="page" data-page="5">
+    <div class="page-content">
+      <div class="page-title">1930年代，无线电与宣传</div>
+      <div class="page-subtitle">声音，第一次能灌进千万人的耳朵</div>
+      <div class="page-body">
+        <p>无线电发明后，信息第一次可以<span class='highlight'>同时送进千家万户</span>。</p>
+        <p>这本来是好事。可1930年代的德国，纳粹把它用到了极致：让收音机变得极便宜，家家都有，然后<span class='highlight'>天天在广播里灌输仇恨和谎言</span>。</p>
+        <p>同一个声音，重复一千遍，很多人就把它当成了真理。</p>
+        <p>这是一个可怕的发现：<span class='highlight'>谎言重复得够多、传得够广，就能伪装成真相。</span>渠道越强大，被滥用的后果越可怕。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>无线电让声音能同时洗脑千万人。谎言重复千遍即成'真理'——渠道越强，越要警惕。
+        </div>
+      </div>
+      <div class="page-num">伍</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/06_radio.png', 'image')">
+        <img src="images/06_radio.png" alt="1930年代，无线电与宣传">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/radio.glb', 'model')">
+        <model-viewer src="../../assets/models/radio.glb" alt="收音机" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: 1950年代，电视时代 -->
+  <div class="page" data-page="6">
+    <div class="page-content">
+      <div class="page-title">1950年代，电视时代</div>
+      <div class="page-subtitle">画面，比真相更有力</div>
+      <div class="page-body">
+        <p>电视来了，信息从'听的'变成'看的'。这又一次改变了权力的游戏。</p>
+        <p>1960年，美国第一次电视直播总统辩论。收音机前的听众觉得尼克松赢了；可看电视的人，看到的是<span class='highlight'>肯尼迪更精神、更上镜</span>，于是认定肯尼迪赢。</p>
+        <p>内容差不多，<span class='highlight'>赢的却是'看起来更好'的那个</span>。</p>
+        <p>电视教会政客一件事：<span class='highlight'>形象比观点重要，画面比真相有力。</span>从此，'看起来怎样'越来越压倒'实际是怎样'。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>电视时代：形象压倒观点，画面压倒真相。'看起来如何'开始比'实际如何'更重要。
+        </div>
+      </div>
+      <div class="page-num">陆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/07_tv.png', 'image')">
+        <img src="images/07_tv.png" alt="1950年代，电视时代">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/television.glb', 'model')">
+        <model-viewer src="../../assets/models/television.glb" alt="电视机" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: 2000年代，人人自媒体 -->
+  <div class="page" data-page="7">
+    <div class="page-content">
+      <div class="page-title">2000年代，人人自媒体</div>
+      <div class="page-subtitle">每个人都能发声，然后呢</div>
+      <div class="page-body">
+        <p>互联网来了，彻底变了天：以前只有报社、电视台能发声，<span class='highlight'>现在人人拿起手机就能发</span>。</p>
+        <p>这当然是巨大的解放——垄断被打破了，普通人也有了话筒。</p>
+        <p>可新问题跟着来了：<span class='highlight'>谁都能说，那谁说的是真的？</span>信息从'太少'变成了'太多'，真的假的混在一起，淹得你喘不过气。</p>
+        <p>过去的问题是'看不到'，现在的问题是'<span class='highlight'>看不过来、分不清</span>'。信息时代，稀缺的不再是信息，而是<span class='highlight'>分辨真假的能力</span>。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>互联网打破垄断，人人可发声。但信息从太少变太多，稀缺的变成'分辨真假的能力'。
+        </div>
+      </div>
+      <div class="page-num">柒</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/08_internet.png', 'image')">
+        <img src="images/08_internet.png" alt="2000年代，人人自媒体">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/smartphone.glb', 'model')">
+        <model-viewer src="../../assets/models/smartphone.glb" alt="智能手机" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: 2010年代，算法推荐 -->
+  <div class="page" data-page="8">
+    <div class="page-content">
+      <div class="page-title">2010年代，算法推荐</div>
+      <div class="page-subtitle">你爱看什么，它就喂你什么</div>
+      <div class="page-body">
+        <p>信息太多了，看不完，于是平台派出了'算法'帮你挑。</p>
+        <p>它像个特别懂你的服务员：你多看两眼猫，它就推一堆猫；你点开一个球星，它就塞满球星。<span class='highlight'>你越爱看什么，它越喂你什么。</span></p>
+        <p>听起来贴心，对吧？但你想过没有——<span class='highlight'>它关心的不是'你该知道什么'，而是'什么能让你一直看下去'</span>，因为你看得越久，它越赚钱。</p>
+        <p>于是，你爱看的越推越多，<span class='highlight'>你不一样、但也许更重要的东西，悄悄从眼前消失了</span>。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>算法只在乎让你'一直看'，不在乎让你'看得全'。它喂你爱看的，藏起你需要的。
+        </div>
+      </div>
+      <div class="page-num">捌</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/09_algorithm.png', 'image')">
+        <img src="images/09_algorithm.png" alt="2010年代，算法推荐">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/algorithm.glb', 'model')">
+        <model-viewer src="../../assets/models/algorithm.glb" alt="算法" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 9: 过滤气泡 -->
+  <div class="page" data-page="9">
+    <div class="page-content">
+      <div class="page-title">过滤气泡</div>
+      <div class="page-subtitle">世界，只剩你想看的那一块</div>
+      <div class="page-body">
+        <p>算法天天喂你爱看的，时间一长，会发生什么？</p>
+        <p>你会像住进一个<span class='highlight'>透明的气泡</span>里：气泡里全是你认同的观点、喜欢的东西，舒舒服服。</p>
+        <p>可气泡外的世界——不一样的想法、你没见过的风景、能纠正你的真话——<span class='highlight'>你全都看不见了</span>。</p>
+        <p>更麻烦的是，气泡里的人容易觉得'<span class='highlight'>全世界都和我想的一样</span>'，遇到不同意见就觉得对方不可理喻。大家越来越吵、越来越对立。还记得吗？这正是《环境的秘密》里讲过的环境的力量。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>过滤气泡：算法把你裹进舒适的信息茧房，让你以为全世界都和你想的一样。
+        </div>
+      </div>
+      <div class="page-num">玖</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/10_bubble.png', 'image')">
+        <img src="images/10_bubble.png" alt="过滤气泡">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/filter_bubble.glb', 'model')">
+        <model-viewer src="../../assets/models/filter_bubble.glb" alt="过滤气泡" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 10: 假新闻为什么比真相跑得快 -->
+  <div class="page" data-page="10">
+    <div class="page-content">
+      <div class="page-title">假新闻为什么比真相跑得快</div>
+      <div class="page-subtitle">越刺激，传得越远</div>
+      <div class="page-body">
+        <p>有人研究过：在社交媒体上，<span class='highlight'>假消息比真消息传得更快、更远、更广</span>。</p>
+        <p>为什么？因为真相常常是平淡的，而假消息可以<span class='highlight'>随便编，怎么刺激怎么来</span>：更吓人、更解气、更离奇、更符合你想听的。</p>
+        <p>人天生就爱传播刺激的事。假消息正好掐住了这个弱点，像病毒一样疯传。</p>
+        <p>所以记住一个规律：<span class='highlight'>一条消息越是让你特别激动、特别想立刻转发，越要先打个问号。</span>情绪，是假消息最好的燃料。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>假新闻比真相跑得快，因为它更刺激、更挠到情绪。越让你激动想转发的，越要先怀疑。
+        </div>
+      </div>
+      <div class="page-num">拾</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/11_fake.png', 'image')">
+        <img src="images/11_fake.png" alt="假新闻为什么比真相跑得快">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/fake_news.glb', 'model')">
+        <model-viewer src="../../assets/models/fake_news.glb" alt="假新闻" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 11: 2024年，AI 与深伪 -->
+  <div class="page" data-page="11">
+    <div class="page-content">
+      <div class="page-title">2024年，AI 与深伪</div>
+      <div class="page-subtitle">连眼睛，也不能全信了</div>
+      <div class="page-body">
+        <p>以前我们说'耳听为虚，眼见为实'。可到了AI时代，这句话不灵了。</p>
+        <p>现在的AI，能做出<span class='highlight'>以假乱真的假照片、假视频、假声音</span>：能让一个名人'说'他从没说过的话，让一个人'出现'在他从没去过的地方，连你妈妈的声音都能模仿。</p>
+        <p>这叫'深度伪造'。以后你看到一段视频，哪怕画面清清楚楚，<span class='highlight'>也得问一句：这是真的吗？</span></p>
+        <p>连眼睛都不能全信的时代，什么最可靠？<span class='highlight'>是你脑子的判断，和多方求证的耐心。</span>这是2024年以后，每个人都必须练的本事。</p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>AI深伪时代，眼见不再为实。最后可靠的，是你的判断力和多方求证的习惯。
+        </div>
+      </div>
+      <div class="page-num">拾壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/12_deepfake.png', 'image')">
+        <img src="images/12_deepfake.png" alt="2024年，AI 与深伪">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/deepfake.glb', 'model')">
+        <model-viewer src="../../assets/models/deepfake.glb" alt="深度伪造" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 12: 写给点点：多问一句'真的吗' -->
+  <div class="page" data-page="12">
+    <div class="page-content">
+      <div class="page-title">写给点点：多问一句'真的吗'</div>
+      <div class="page-subtitle">你的眼睛，你做主</div>
+      <div class="page-body">
+        <p>点点，从烽火台讲到AI深伪，这本书其实只讲了一件事：<span class='highlight'>你看到的，未必是全部的真相，也未必是真的。</span></p>
+        <p>几千年来，总有人想控制你看到什么——为的是控制你怎么想。从抄经的教士，到煽情的报纸，到今天的算法和AI。</p>
+        <p>那怎么办？给你三个小办法：</p>
+        <p><span class='highlight'>一、看到特别激动的消息，先停三秒，问一句'真的吗'。</span></p>
+        <p><span class='highlight'>二、别只在一个地方看，多找几个来源对对。</span>三、分清'事实'和'观点'：'今天下雨'是事实，'下雨真讨厌'是观点。</p>
+        <p>愿你在信息的汪洋里，<span class='highlight'>不当随波逐流的浮萍，做一个有锚的人。眼见为虚，脑证为实。</span></p>
+        <div class="key-takeaway">
+          <strong>信息的逻辑：</strong>全书落点：眼见为虚，脑证为实。面对信息，多问'真的吗'、多方求证、分清事实与观点。
+        </div>
+      </div>
+      <div class="page-num">拾贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/13_dot.png', 'image')">
+        <img src="images/13_dot.png" alt="写给点点：多问一句'真的吗'">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/lighthouse.glb', 'model')">
+        <model-viewer src="../../assets/models/lighthouse.glb" alt="灯塔" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changePage(-1)">‹</button>
+  <span class="page-indicator" id="indicator">1 / 13</span>
+  <button id="nextBtn" onclick="changePage(1)">›</button>
+</div>
+
+<!-- Fullscreen Modal -->
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-hint">拖拽旋转 · 滚轮缩放 · 点击 × 关闭</div>
+</div>
+
+<!-- Progress dots -->
+<div class="dots" id="dots"></div>
+
+
+
+<script>
+let currentPage = 0;
+const totalPages = 13;
+const pages = document.querySelectorAll('.page');
+
+// Build dots
+const dotsContainer = document.getElementById('dots');
+for (let i = 0; i < totalPages; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToPage(i);
+  dotsContainer.appendChild(dot);
+}
+
+function updateUI() {
+  document.getElementById('indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+
+  pages.forEach((p, i) => {
+    p.classList.remove('active', 'prev');
+    if (i === currentPage) p.classList.add('active');
+    else if (i < currentPage) p.classList.add('prev');
+  });
+
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentPage);
+  });
+}
+
+function changePage(dir) {
+  const next = currentPage + dir;
+  if (next >= 0 && next < totalPages) {
+    currentPage = next;
+    updateUI();
+  }
+}
+
+function goToPage(i) {
+  currentPage = i;
+  updateUI();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'Escape') closeModal();
+});
+
+// Touch / swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
+});
+
+// Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  const hint = modal.querySelector('.modal-hint');
+
+  if (type === 'image') {
+    content.innerHTML = `<img src="${src}" alt="放大图片">`;
+    if (hint) hint.textContent = '点击 × 或按 ESC 关闭';
+  } else {
+    content.innerHTML = `
+      <model-viewer
+        src="${src}"
+        alt="3D模型"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1.3"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+    if (hint) hint.textContent = '拖拽旋转 · 滚轮缩放 · 点击 × 关闭';
+  }
+
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// 点击图片背景区域也可关闭
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal' || e.target.id === 'modalContent') closeModal();
+});
+
+updateUI();
+</script>
+</body>
+</html>

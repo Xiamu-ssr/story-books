@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>钱是什么 · 点点的书架</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3/dist/model-viewer.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1410;
+  --bg-page: #faf6ee;
+  --accent-gold: #c9a84c;
+  --accent-red: #b8423a;
+  --text-dark: #2c2418;
+  --text-light: #6b5d4f;
+  --shadow: rgba(0,0,0,0.15);
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg-dark);
+}
+
+#book {
+  width: 100vw; height: 100vh;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.page {
+  position: absolute;
+  width: 94%; max-width: 1100px;
+  height: 88%; max-height: 800px;
+  background: var(--bg-page);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px rgba(201,168,76,0.2);
+  display: flex;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(100px) rotateY(8deg) scale(0.92);
+  transform-origin: left center;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateX(0) rotateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.page.prev {
+  opacity: 0;
+  transform: translateX(-100px) rotateY(-8deg) scale(0.92);
+  transform-origin: right center;
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 50px;
+  overflow-y: auto;
+}
+
+.page-media {
+  width: 45%;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(201,168,76,0.2);
+  background: #f0e9dc;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.page-media model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.media-item {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.media-item:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.media-item model-viewer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+.media-label {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  pointer-events: none;
+  background: rgba(250,246,238,0.8);
+  padding: 4px 8px;
+}
+
+.media-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  flex-shrink: 0;
+}
+
+.page-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.page-media.full {
+  width: 100%;
+  height: 100%;
+  border-left: none;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 20px; right: 30px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+}
+
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.page-body {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.page-body p {
+  margin-bottom: 14px;
+}
+
+.page-body .highlight {
+  background: linear-gradient(transparent 60%, rgba(201,168,76,0.25) 60%);
+  font-weight: 500;
+}
+
+.key-takeaway {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-gold);
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.key-takeaway strong {
+  color: var(--accent-red);
+}
+
+/* Cover page special style */
+.page.cover {
+  background: linear-gradient(135deg, #1a1410 0%, #2c2418 50%, #1a1410 100%);
+  flex-direction: column;
+}
+
+.page.cover .page-content {
+  color: #e8dcc8;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 60px 50px;
+}
+
+.page.cover .cover-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 20px rgba(201,168,76,0.3);
+}
+
+.page.cover .cover-subtitle {
+  font-size: 18px;
+  color: #a89878;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+.page.cover .cover-meta {
+  font-size: 13px;
+  color: #6b5d4f;
+  margin-top: 40px;
+  letter-spacing: 1px;
+}
+
+.page.cover .cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+.page.cover .cover-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 100;
+  background: rgba(26,20,16,0.85);
+  padding: 10px 20px;
+  border-radius: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.nav button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.nav button:hover {
+  background: #e0c060;
+  transform: scale(1.1);
+}
+
+.nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav .page-indicator {
+  color: #e8dcc8;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Home link */
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: rgba(232,220,200,0.6);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(26,20,16,0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+
+.home-link:hover {
+  color: var(--accent-gold);
+  background: rgba(26,20,16,0.85);
+}
+
+/* Progress dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  background: var(--accent-gold);
+  transform: scale(1.4);
+}
+
+/* Scrollbar */
+.page-content::-webkit-scrollbar { width: 5px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page { flex-direction: column; height: 90%; width: 94%; }
+  .page-media { width: 100%; height: 40%; border-left: none; border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: row; } .media-item { flex: 1; } .media-divider { width: 1px; height: auto; }
+  .page-content { padding: 24px 28px; }
+  .page-title { font-size: 22px; }
+  .page-body { font-size: 14px; line-height: 1.8; }
+  .page.cover .cover-title { font-size: 32px; }
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,16,0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-close:hover {
+  transform: scale(1.1);
+}
+
+.modal-content {
+  width: 90%;
+  height: 90%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content model-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(232,220,200,0.6);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<a class="home-link" href="../../index.html">‹ 返回书架</a>
+
+<div id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="cover-bg">
+      <img src="images/01_cover.png" alt="钱是什么">
+    </div>
+    <div class="page-content">
+      <div class="cover-title">钱是什么</div>
+      <div class="cover-subtitle">一张纸，为什么能换全世界</div>
+      <div class="cover-meta">讲给点点的 13 个故事</div>
+    </div>
+  </div>
+
+  <!-- Page 1: 公元前9000年，用羊换斧头的麻烦 -->
+  <div class="page" data-page="1">
+    <div class="page-content">
+      <div class="page-title">公元前9000年，用羊换斧头的麻烦</div>
+      <div class="page-subtitle">没有钱的年代，交换有多难</div>
+      <div class="page-body">
+        <p>很久以前，世界上没有钱。你想要别人的东西，只能拿自己的东西去换。</p>
+        <p>你家养羊，想吃麦子，就得牵一只羊去找种麦子的人。可问题来了——</p>
+        <p>万一人家<span class='highlight'>不要羊，只要盐</span>呢？你得先把羊换成盐，再拿盐去换麦子。绕一大圈，腿都跑断了。</p>
+        <p>而且，一只羊怎么分？半只羊就死了。交换实在太麻烦了。<span class='highlight'>人们急需一个'大家都认的中间物'。</span></p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>钱的起点：交换太麻烦，人们需要一个大家都愿意接受的中间物。这就是钱的雏形。
+        </div>
+      </div>
+      <div class="page-num">壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/02_barter.png', 'image')">
+        <img src="images/02_barter.png" alt="公元前9000年，用羊换斧头的麻烦">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/sheep.glb', 'model')">
+        <model-viewer src="../../assets/models/sheep.glb" alt="羊" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: 贝壳、盐和石头 -->
+  <div class="page" data-page="2">
+    <div class="page-content">
+      <div class="page-title">贝壳、盐和石头</div>
+      <div class="page-subtitle">什么东西能当钱</div>
+      <div class="page-body">
+        <p>慢慢人们发现，有些东西特别适合当'中间物'。</p>
+        <p>海边的人用<span class='highlight'>贝壳</span>——漂亮、稀少、好携带、坏不了；有的地方用<span class='highlight'>盐</span>——人人都要吃盐；太平洋有个岛，居然用大石头当钱。</p>
+        <p>看出规律了吗？能当钱的东西，必须<span class='highlight'>稀少、耐用、好带、大家都认</span>。</p>
+        <p>在中国，'钱'这个字，偏旁是'贝'。因为最早的汉字里，<span class='highlight'>钱就是贝壳变的</span>。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>能当钱的东西有四个条件：稀少、耐用、好携带、大家都认。贝壳、盐、石头都当过钱。
+        </div>
+      </div>
+      <div class="page-num">贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/03_shell.png', 'image')">
+        <img src="images/03_shell.png" alt="贝壳、盐和石头">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/cowrie.glb', 'model')">
+        <model-viewer src="../../assets/models/cowrie.glb" alt="贝壳" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: 公元前600年，第一枚金币 -->
+  <div class="page" data-page="3">
+    <div class="page-content">
+      <div class="page-title">公元前600年，第一枚金币</div>
+      <div class="page-subtitle">国家盖章，信任诞生</div>
+      <div class="page-body">
+        <p>贝壳虽好，可大小不一、容易碎。人们想要更标准的钱。</p>
+        <p>在小亚细亚有个叫吕底亚的王国（今天的土耳其），他们做了一件大事：</p>
+        <p>把金银铸成<span class='highlight'>大小、重量都一样的圆片</span>，还在上面<span class='highlight'>盖上国王的印章</span>。</p>
+        <p>这个章的意思是：<span class='highlight'>'我保证它值这么多。'</span>从此，你不用称重量、不用验成色——看到章就放心。<span class='highlight'>钱，第一次有了'国家信用'。</span></p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>硬币的关键不是金属，是上面那个章——国家替它担保。钱开始有了信用。
+        </div>
+      </div>
+      <div class="page-num">叁</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/04_coin.png', 'image')">
+        <img src="images/04_coin.png" alt="公元前600年，第一枚金币">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/gold_coin.glb', 'model')">
+        <model-viewer src="../../assets/models/gold_coin.glb" alt="金币" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: 公元1000年，北宋的交子 -->
+  <div class="page" data-page="4">
+    <div class="page-content">
+      <div class="page-title">公元1000年，北宋的交子</div>
+      <div class="page-subtitle">中国人最早把纸变成钱</div>
+      <div class="page-body">
+        <p>铜钱、金币太重了。买一匹好马，得拉一车子钱，又沉又招贼。</p>
+        <p>北宋时，四川的商人想了个办法：把钱存在铺子里，铺子开一张<span class='highlight'>纸做的凭证</span>，叫<span class='highlight'>'交子'</span>。</p>
+        <p>你拿着这张纸，到别处就能换钱、买东西。纸比铜钱轻多了，生意一下子好做了。</p>
+        <p>这是<span class='highlight'>全世界最早的纸币</span>，比欧洲早了好几百年。一张纸能当钱，靠的是<span class='highlight'>大家相信它能换回真钱</span>。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>交子是世界最早的纸币。纸本身不值钱，值钱的是背后的'相信'。
+        </div>
+      </div>
+      <div class="page-num">肆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/05_jiaozi.png', 'image')">
+        <img src="images/05_jiaozi.png" alt="公元1000年，北宋的交子">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/jiaozi.glb', 'model')">
+        <model-viewer src="../../assets/models/jiaozi.glb" alt="交子" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: 1400年，威尼斯的银行家 -->
+  <div class="page" data-page="5">
+    <div class="page-content">
+      <div class="page-title">1400年，威尼斯的银行家</div>
+      <div class="page-subtitle">坐在长凳上，凭空造钱</div>
+      <div class="page-body">
+        <p>意大利威尼斯，商人们来来往往，带着各国的钱，兑换特别麻烦。</p>
+        <p>于是出现了一种人，坐在广场的长凳上，帮你<span class='highlight'>换钱、存钱、记账</span>。'银行'这个词，就是从意大利语'长凳'来的。</p>
+        <p>后来他们发现：存钱的人不会同时来取钱。于是<span class='highlight'>把别人存的钱，偷偷借出去收利息</span>——手里的钱，就这么'变多'了。</p>
+        <p>这就是银行的秘密：<span class='highlight'>你存一块钱，银行能把它当成好几块钱用。</span>钱，开始被'造'出来。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>银行靠'借短放长'造钱：你存的钱，银行转手借给别人，钱就这样被放大了。
+        </div>
+      </div>
+      <div class="page-num">伍</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/06_bank.png', 'image')">
+        <img src="images/06_bank.png" alt="1400年，威尼斯的银行家">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/bank_bench.glb', 'model')">
+        <model-viewer src="../../assets/models/bank_bench.glb" alt="银行长凳" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: 1800年代，金本位的承诺 -->
+  <div class="page" data-page="6">
+    <div class="page-content">
+      <div class="page-title">1800年代，金本位的承诺</div>
+      <div class="page-subtitle">一张纸背后的黄金</div>
+      <div class="page-body">
+        <p>纸币方便，可总有人不放心：万一这纸变不出钱呢？</p>
+        <p>各国想了个让人安心的办法，叫<span class='highlight'>金本位</span>：政府承诺，<span class='highlight'>你手里的每一张纸币，随时能到银行换回固定重量的黄金</span>。</p>
+        <p>这下没人慌了。纸币背后有真金兜底，大家用得踏踏实实。</p>
+        <p>你看，钱越来越'虚'，但靠的是一句越来越实的<span class='highlight'>承诺</span>。问题是——这个承诺，能一直兑现吗？</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>金本位：纸币能随时换黄金。钱的信用，靠'能兑现'这三个字撑着。
+        </div>
+      </div>
+      <div class="page-num">陆</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/07_gold_std.png', 'image')">
+        <img src="images/07_gold_std.png" alt="1800年代，金本位的承诺">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/gold_bar.glb', 'model')">
+        <model-viewer src="../../assets/models/gold_bar.glb" alt="金条" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: 1971年，美元和黄金分手 -->
+  <div class="page" data-page="7">
+    <div class="page-content">
+      <div class="page-title">1971年，美元和黄金分手</div>
+      <div class="page-subtitle">从那天起，钱只剩'信'</div>
+      <div class="page-body">
+        <p>1971年，发生了一件改变全世界的事。</p>
+        <p>美国总统尼克松宣布：<span class='highlight'>美元不再兑换黄金</span>。那句'随时换真金'的承诺，作废了。</p>
+        <p>从那天起，钱背后不再有金子了。那一美元、一百块，<span class='highlight'>只是一张纸、一个数字</span>。</p>
+        <p>那它为什么还能买东西？因为<span class='highlight'>所有人都相信它有用</span>，国家也用法律给它撑腰。钱，彻底变成了一种<span class='highlight'>'信心'</span>。只要信心在，纸就是钱。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>1971年后，钱和黄金脱钩。今天的钱不靠金子，靠的是'所有人的相信'加'国家信用'。
+        </div>
+      </div>
+      <div class="page-num">柒</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/08_1971.png', 'image')">
+        <img src="images/08_1971.png" alt="1971年，美元和黄金分手">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/cut_dollar.glb', 'model')">
+        <model-viewer src="../../assets/models/cut_dollar.glb" alt="美元与黄金分离" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: 中央银行，钱的总闸门 -->
+  <div class="page" data-page="8">
+    <div class="page-content">
+      <div class="page-title">中央银行，钱的总闸门</div>
+      <div class="page-subtitle">钱为什么会'变毛'</div>
+      <div class="page-body">
+        <p>每个国家都有一个管钱的'总闸门'，叫<span class='highlight'>中央银行</span>（中国的叫中国人民银行，美国的叫美联储）。</p>
+        <p>它能决定：<span class='highlight'>印多少钱、钱借出去贵不贵</span>。</p>
+        <p>如果印太多钱，东西还是那么多，那每块钱能买到的东西就变少了——以前一块钱一根冰棍，后来要五块。这叫<span class='highlight'>通货膨胀</span>，老人管它叫'钱变毛了'。</p>
+        <p>所以央行的工作，是<span class='highlight'>让钱不多不少刚刚好</span>：太少经济转不动，太多钱就毛了。这是个技术活。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>央行是钱的总闸门。钱印多了会通货膨胀——同样的钱，买到的东西变少了。
+        </div>
+      </div>
+      <div class="page-num">捌</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/09_inflation.png', 'image')">
+        <img src="images/09_inflation.png" alt="中央银行，钱的总闸门">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/money_faucet.glb', 'model')">
+        <model-viewer src="../../assets/models/money_faucet.glb" alt="货币水龙头" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 9: 2010年代，手机里的数字钱 -->
+  <div class="page" data-page="9">
+    <div class="page-content">
+      <div class="page-title">2010年代，手机里的数字钱</div>
+      <div class="page-subtitle">钱变成了看不见的信号</div>
+      <div class="page-body">
+        <p>到了点点这一代，钱又变了——连纸都看不见了。</p>
+        <p>爸爸妈妈买早点，掏出手机'嘀'一下；你过生日，爷爷奶奶发来个红包。钱变成了<span class='highlight'>手机里的一串数字</span>。</p>
+        <p>这背后，是微信、支付宝在帮你<span class='highlight'>记账</span>：你扫一下，它就从你的账户减一点，给商家的账户加一点。</p>
+        <p>方便是真方便，但也意味着：<span class='highlight'>你的每一笔钱，平台都记得清清楚楚。</span>钱越方便，越离不开那套记账的系统。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>移动支付让钱变成数字信号。方便的背后，是平台在替你记账——它记得你的每一分钱。
+        </div>
+      </div>
+      <div class="page-num">玖</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/10_digital.png', 'image')">
+        <img src="images/10_digital.png" alt="2010年代，手机里的数字钱">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/qr_payment.glb', 'model')">
+        <model-viewer src="../../assets/models/qr_payment.glb" alt="扫码支付" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 10: 信用卡与花呗：花明天的钱 -->
+  <div class="page" data-page="10">
+    <div class="page-content">
+      <div class="page-title">信用卡与花呗：花明天的钱</div>
+      <div class="page-subtitle">先享受，后付钱，谁赚了</div>
+      <div class="page-body">
+        <p>还有一种钱，更神奇——<span class='highlight'>你还没挣到，就能先花</span>。</p>
+        <p>信用卡、花呗，都是这个逻辑：先看中的东西先买，<span class='highlight'>下个月再还钱</span>。</p>
+        <p>听起来很美，对吧？但如果你还不上，或者只还一点点，剩下的就要付<span class='highlight'>利息</span>——而且利息不低。</p>
+        <p>这就是它赚钱的方式：<span class='highlight'>它巴不得你慢慢还，还得越慢，它赚得越多。</span>先甜后苦，世界上最贵的东西，常常是'免费先用'的。</p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>信用卡和花呗让你'花明天的钱'。方便的另一面是利息——它最希望你慢慢还。
+        </div>
+      </div>
+      <div class="page-num">拾</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/11_credit.png', 'image')">
+        <img src="images/11_credit.png" alt="信用卡与花呗：花明天的钱">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/credit_card.glb', 'model')">
+        <model-viewer src="../../assets/models/credit_card.glb" alt="信用卡" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 11: 2009年，比特币 -->
+  <div class="page" data-page="11">
+    <div class="page-content">
+      <div class="page-title">2009年，比特币</div>
+      <div class="page-subtitle">代码能当钱吗</div>
+      <div class="page-body">
+        <p>既然钱靠的是'相信'，那能不能<span class='highlight'>不靠国家、不靠银行</span>，造一种钱？</p>
+        <p>2009年，一个自称'中本聪'的神秘人（到现在也没人知道他是谁），做出了<span class='highlight'>比特币</span>。</p>
+        <p>它没有银行管，靠的是一套全世界电脑一起维护的账本，谁也改不了、赖不掉。总量还写死在代码里，只有2100万个，谁都印不出来。</p>
+        <p>有人说这是未来，有人说这是泡沫。但它证明了一件事：<span class='highlight'>人们开始尝试，用代码来建立'信任'，而不是用银行和政府。</span></p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>比特币是场实验：不要银行，用代码和算法来建立信任。它还在路上，但想法很大胆。
+        </div>
+      </div>
+      <div class="page-num">拾壹</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/12_bitcoin.png', 'image')">
+        <img src="images/12_bitcoin.png" alt="2009年，比特币">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/bitcoin.glb', 'model')">
+        <model-viewer src="../../assets/models/bitcoin.glb" alt="比特币" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 12: 写给点点：钱不是目的 -->
+  <div class="page" data-page="12">
+    <div class="page-content">
+      <div class="page-title">写给点点：钱不是目的</div>
+      <div class="page-subtitle">看懂钱，才不会被钱牵着走</div>
+      <div class="page-body">
+        <p>点点，从一只羊讲到比特币，其实就一句话：<span class='highlight'>钱是人们'约定好都相信'的东西。</span></p>
+        <p>贝壳也好、金币也好、手机里的数字也好，它们本身都不值钱。值钱的，是<span class='highlight'>背后那份信任</span>。</p>
+        <p>所以记住两件事：第一，钱会变。今天的纸币，也许几十年后就像贝壳一样进了博物馆。</p>
+        <p>第二，也是最重要的——<span class='highlight'>钱是工具，不是目的</span>。有人拼命追钱，最后成了钱的奴隶；有人看懂钱，让钱帮自己做事、帮别人解难。</p>
+        <p>愿你是后者：<span class='highlight'>看懂钱，用好钱，但永远不要只为了钱。</span></p>
+        <div class="key-takeaway">
+          <strong>钱的逻辑：</strong>全书落点：钱是信任的工具，不是人生的目的。看懂它，是为了驾驭它，而不是被它驾驭。
+        </div>
+      </div>
+      <div class="page-num">拾贰</div>
+    </div>
+    <div class="page-media">
+      <div class="media-item" ondblclick="openModal('images/13_dot.png', 'image')">
+        <img src="images/13_dot.png" alt="写给点点：钱不是目的">
+        <div class="media-label">双击放大</div>
+      </div>
+      <div class="media-divider"></div>
+      <div class="media-item" ondblclick="openModal('../../assets/models/piggy_bank.glb', 'model')">
+        <model-viewer src="../../assets/models/piggy_bank.glb" alt="存钱罐" auto-rotate camera-controls shadow-intensity="1" exposure="0.8" style="--poster-color: transparent;"></model-viewer>
+        <div class="media-label">3D模型 · 双击全屏</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changePage(-1)">‹</button>
+  <span class="page-indicator" id="indicator">1 / 13</span>
+  <button id="nextBtn" onclick="changePage(1)">›</button>
+</div>
+
+<!-- Fullscreen Modal -->
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-hint">拖拽旋转 · 滚轮缩放 · 点击 × 关闭</div>
+</div>
+
+<!-- Progress dots -->
+<div class="dots" id="dots"></div>
+
+<script>
+let currentPage = 0;
+const totalPages = 13;
+const pages = document.querySelectorAll('.page');
+
+// Build dots
+const dotsContainer = document.getElementById('dots');
+for (let i = 0; i < totalPages; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToPage(i);
+  dotsContainer.appendChild(dot);
+}
+
+function updateUI() {
+  document.getElementById('indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+
+  pages.forEach((p, i) => {
+    p.classList.remove('active', 'prev');
+    if (i === currentPage) p.classList.add('active');
+    else if (i < currentPage) p.classList.add('prev');
+  });
+
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentPage);
+  });
+}
+
+function changePage(dir) {
+  const next = currentPage + dir;
+  if (next >= 0 && next < totalPages) {
+    currentPage = next;
+    updateUI();
+  }
+}
+
+function goToPage(i) {
+  currentPage = i;
+  updateUI();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changePage(1); }
+  if (e.key === 'Escape') closeModal();
+});
+
+// Touch / swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
+});
+
+// Modal functions
+function openModal(src, type) {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  const hint = modal.querySelector('.modal-hint');
+
+  if (type === 'image') {
+    content.innerHTML = `<img src="${src}" alt="放大图片">`;
+    if (hint) hint.textContent = '点击 × 或按 ESC 关闭';
+  } else {
+    content.innerHTML = `
+      <model-viewer
+        src="${src}"
+        alt="3D模型"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1.3"
+        style="width:100%;height:100%;--poster-color: transparent;">
+      </model-viewer>
+    `;
+    if (hint) hint.textContent = '拖拽旋转 · 滚轮缩放 · 点击 × 关闭';
+  }
+
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// 点击图片背景区域也可关闭
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal' || e.target.id === 'modalContent') closeModal();
+});
+
+updateUI();
+</script>
+</body>
+</html>
